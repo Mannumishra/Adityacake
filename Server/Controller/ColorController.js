@@ -3,15 +3,18 @@ const Color = require("../Model/ColourModel");
 // Create a new color
 const createColor = async (req, res) => {
     try {
-        const { colorName, colorStatus } = req.body;
-        if (!colorName) {
+        const { colorName, color, colorStatus } = req.body;
+
+        if (!colorName || !color) {
             return res.status(400).json({
                 success: false,
-                message: "Color Is must required"
-            })
+                message: "Color Name and Color are required"
+            });
         }
+
         const newColor = new Color({
             colorName,
+            color,
             colorStatus: colorStatus || "False" // Default to "False" if not provided
         });
 
@@ -72,12 +75,13 @@ const getColorById = async (req, res) => {
 const updateColor = async (req, res) => {
     try {
         const { id } = req.params; // Get the color ID from the request parameters
-        const { colorName, colorStatus } = req.body; // Extract data from the request body
+        const { colorName, color, colorStatus } = req.body; // Extract data from the request body
 
-        const updatedColor = await Color.findByIdAndUpdate(id, {
-            colorName,
-            colorStatus
-        }, { new: true }); // Update and return the new document
+        const updatedColor = await Color.findByIdAndUpdate(
+            id,
+            { colorName, color, colorStatus },
+            { new: true } // Update and return the new document
+        );
 
         if (!updatedColor) {
             return res.status(404).json({

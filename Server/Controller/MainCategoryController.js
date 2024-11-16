@@ -3,10 +3,14 @@ const path = require("path");
 const MainCategory = require("../Model/MainCategoryModel");
 
 
-// Helper function to delete an image file from the local path
-const deleteImageFile = (filePath) => {
-    fs.unlink(filePath, (err) => {
-        if (err) console.error("Failed to delete image:", err);
+const deleteImageFile = (relativeFilePath) => {
+    const absolutePath = path.join(__dirname, "..", relativeFilePath);
+    fs.unlink(absolutePath, (err) => {
+        if (err) {
+            console.error("Failed to delete image:", err);
+        } else {
+            console.log("Image deleted:", absolutePath);
+        }
     });
 };
 

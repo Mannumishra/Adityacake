@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const AllShopBanner = () => {
+const AllSBanner = () => {
     const [banners, setBanners] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -56,10 +56,10 @@ const AllShopBanner = () => {
             <ToastContainer />
             <div className="bread">
                 <div className="head">
-                    <h4>All Shop Banners</h4>
+                    <h4>All Banners</h4>
                 </div>
                 <div className="links">
-                    <Link to="/add-shop-banner" className="add-new">
+                    <Link to="/add-banner" className="add-new">
                         Add New <i className="fa-solid fa-plus"></i>
                     </Link>
                 </div>
@@ -111,7 +111,7 @@ const AllShopBanner = () => {
                                         /> {banner.bannerStatus}
                                     </td>
                                     <td>
-                                        <Link to={`/edit-shop-banner/${banner._id}`} className="bt edit">
+                                        <Link to={`/edit-banner/${banner._id}`} className="bt edit">
                                             Edit <i className="fa-solid fa-pen-to-square"></i>
                                         </Link>
                                     </td>
@@ -137,4 +137,4 @@ const AllShopBanner = () => {
     );
 };
 
-export default AllShopBanner;
+export default AllSBanner;

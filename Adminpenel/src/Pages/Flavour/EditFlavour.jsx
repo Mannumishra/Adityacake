@@ -8,25 +8,20 @@ const EditFlavour = () => {
     const { id } = useParams(); // Get the flavour ID from the URL
     const navigate = useNavigate(); // Hook for programmatic navigation
     const [flavourData, setFlavourData] = useState({
-        flavourName: '',
-        flavourStatus: false // Use boolean for checkbox state
+        floverName: '',
+        floverStatus: false // Use boolean for checkbox state
     });
     const [btnLoading, setBtnLoading] = useState(false);
-
-    console.log(flavourData)
 
     useEffect(() => {
         const fetchFlavour = async () => {
             try {
-                const response = await axios.get(`http://localhost:8000/api/get-single-flower/${id}`);
-                
-                // Check the structure of the response
-                console.log(response.data); // Debugging line
-
+                const response = await axios.get(`http://localhost:8000/api/get-single-flover/${id}`);
+                console.log(response); 
                 if (response.data && response.data.data) {
                     setFlavourData({
-                        flavourName: response.data.data.flavourName || '', // Ensure it matches the API response
-                        flavourStatus: response.data.data.flavourStatus === 'True' // Convert string to boolean
+                        floverName: response.data.data.floverName || '', // Ensure it matches the API response
+                        floverStatus: response.data.data.floverStatus === 'True' // Convert string to boolean
                     });
                 } else {
                     toast.error('Flavour data not found');
@@ -52,12 +47,12 @@ const EditFlavour = () => {
         setBtnLoading(true); // Set loading state to true
 
         const updatedData = {
-            flavourName: flavourData.flavourName,
-            flavourStatus: flavourData.flavourStatus ? 'True' : 'False' // Convert boolean back to string
+            floverName: flavourData.floverName,
+            floverStatus: flavourData.floverStatus ? 'True' : 'False' // Convert boolean back to string
         };
 
         try {
-            const response = await axios.put(`http://localhost:8000/api/update-flower/${id}`, updatedData);
+            const response = await axios.put(`http://localhost:8000/api/update-flover/${id}`, updatedData);
             toast.success(response.data.message); // Show success message
             navigate('/all-flower'); // Redirect to the all flavours page
         } catch (error) {
@@ -82,25 +77,25 @@ const EditFlavour = () => {
             <div className="d-form">
                 <form className="row g-3" onSubmit={handleSubmit}>
                     <div className="col-md-4">
-                        <label htmlFor="flavourName" className="form-label">Flavour Name</label>
+                        <label htmlFor="floverName" className="form-label">Flavour Name</label>
                         <input
                             type="text"
-                            name='flavourName'
+                            name='floverName'
                             className="form-control"
-                            id="flavourName"
-                            value={flavourData.flavourName}
+                            id="floverName"
+                            value={flavourData.floverName}
                             onChange={handleChange}
                             required
                         />
                     </div>
-                    <div className="col-md-2">
-                        <label htmlFor="flavourStatus" className="form-label">Active</label>
+                    <div className="col-md-12">
+                        <label htmlFor="floverStatus" className="form-label">Active</label>
                         <input
                             type="checkbox"
-                            name='flavourStatus'
+                            name='floverStatus'
                             className="form-check-input"
-                            id="flavourStatus"
-                            checked={flavourData.flavourStatus}
+                            id="floverStatus"
+                            checked={flavourData.floverStatus}
                             onChange={handleChange}
                         />
                     </div>

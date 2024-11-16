@@ -69,7 +69,7 @@ const AddSize = () => {
                             required // Mark as required
                         />
                     </div>
-                    <div className="col-12">
+                    <div className="col-md-12">
                         <div className="form-check">
                             <input
                                 className="form-check-input"

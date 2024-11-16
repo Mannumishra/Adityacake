@@ -1,21 +1,25 @@
 const mongoose = require("mongoose")
 
 const SubCategorySchema = new mongoose.Schema({
-    categoryName:{
-        type:mongoose.Schema.ObjectId,
-        ref:"Main-Category",
-        required:true
+    categoryName: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Main-Category",
+        required: true
     },
-    subcategoryName:{
-        type:String,
-        required:true
+    subcategoryName: {
+        type: String,
+        required: true
     },
-    subcategoryStatus:{
-        type:String,
-        default:"False"
+    subcategoryStatus: {
+        type: String,
+        default: "False"
+    },
+    subcategoryImage: {
+        type: String, // URL or path to the image
+        required: false
     }
-},{timestamps:true})
+}, { timestamps: true })
 
-const Subcategory = mongoose.model("Subcategory" ,SubCategorySchema)
+const Subcategory = mongoose.model("Subcategory", SubCategorySchema)
 
 module.exports = Subcategory

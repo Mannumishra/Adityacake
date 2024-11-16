@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const AddBanner = () => {
+const AddShopBanner = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [data, setData] = useState({
         customer: "",
@@ -143,4 +143,4 @@ const AddBanner = () => {
     );
 };
 
-export default AddBanner;
+export default AddShopBanner;

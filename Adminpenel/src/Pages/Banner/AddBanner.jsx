@@ -1,41 +1,18 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const EditShopBanner = () => {
-    const { id } = useParams();
+const AddBanner = () => {
     const [formData, setFormData] = useState({
         bannerName: '',
         bannerImage: null,
         bannerType: '',
         bannerStatus: false,
     });
-    const [previewImage, setPreviewImage] = useState('');
-    const [btnLoading, setBtnLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const fetchBannerData = async () => {
-            try {
-                const response = await axios.get(`http://localhost:8000/api/get-single-banner/${id}`);
-                const banner = response.data.data;
-                setFormData({
-                    bannerName: banner.bannerName,
-                    bannerImage: null,
-                    bannerType: banner.bannerType,
-                    bannerStatus: banner.bannerStatus === 'True',
-                });
-                setPreviewImage(`http://localhost:8000/${banner.bannerImage}`);
-            } catch (error) {
-                console.error("Failed to fetch banner data:", error);
-                toast.error("Failed to load banner data");
-            }
-        };
-
-        fetchBannerData();
-    }, [id]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -46,44 +23,45 @@ const EditShopBanner = () => {
     };
 
     const handleImageChange = (e) => {
-        const file = e.target.files[0];
         setFormData({
             ...formData,
-            bannerImage: file,
+            bannerImage: e.target.files[0],
         });
-        setPreviewImage(URL.createObjectURL(file));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.bannerName || !formData.bannerType) {
-            toast.error("All fields except image are required");
+        if (!formData.bannerName || !formData.bannerImage || !formData.bannerType) {
+            toast.error("All fields are required");
             return;
         }
 
         const submitData = new FormData();
         submitData.append('bannerName', formData.bannerName);
-        if (formData.bannerImage) submitData.append('bannerImage', formData.bannerImage);
+        submitData.append('bannerImage', formData.bannerImage);
         submitData.append('bannerType', formData.bannerType);
         submitData.append('bannerStatus', formData.bannerStatus ? "True" : "False");
 
         try {
-            setBtnLoading(true);
-            const response = await axios.put(`http://localhost:8000/api/update-banner/${id}`, submitData, {
+            setIsLoading(true);
+            const response = await axios.post('http://localhost:8000/api/create-banner', submitData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            if (response.status === 200) {
-                toast.success("Banner updated successfully");
-                navigate('/all-shop-banners');
-            }
+            console.log(response)
+           if(response.status===201){
+            toast.success("Banner added successfully");
+            navigate('/all-banners');
+            setIsLoading(false)
+           }
         } catch (error) {
-            console.error("Failed to update banner:", error);
-            toast.error("Failed to update banner");
+            console.log(error)
+            setIsLoading(false)
+            toast.error("Failed to add banner");
         } finally {
-            setBtnLoading(false);
+            setIsLoading(false);
         }
     };
 
@@ -92,10 +70,10 @@ const EditShopBanner = () => {
             <ToastContainer />
             <div className="bread">
                 <div className="head">
-                    <h4>Edit Shop Banner</h4>
+                    <h4>Add Shop Banner</h4>
                 </div>
                 <div className="links">
-                    <Link to="/all-shop-banners" className="add-new">Back <i className="fa-regular fa-circle-left"></i></Link>
+                    <Link to="/all-banners" className="add-new">Back <i className="fa-regular fa-circle-left"></i></Link>
                 </div>
             </div>
 
@@ -121,16 +99,8 @@ const EditShopBanner = () => {
                             className="form-control"
                             id="bannerImage"
                             onChange={handleImageChange}
+                            required
                         />
-                    </div>
-                    <div className="col-md-6">
-                        {previewImage && (
-                            <img
-                                src={previewImage}
-                                alt="Banner Preview"
-                                style={{ width: '100px', height: '100px' }}
-                            />
-                        )}
                     </div>
                     <div className="col-md-6">
                         <label htmlFor="bannerType" className="form-label">Banner Type</label>
@@ -142,7 +112,7 @@ const EditShopBanner = () => {
                             onChange={handleChange}
                             required
                         >
-                            <option value="">Select Banner Type</option>
+                            <option value="" selected disabled>Select Banner Type</option>
                             <option value="Desktop">Desktop</option>
                             <option value="Mobile">Mobile</option>
                             <option value="Both">Both</option>
@@ -159,17 +129,17 @@ const EditShopBanner = () => {
                                 onChange={handleChange}
                             />
                             <label className="form-check-label" htmlFor="bannerStatus">
-                                Active
+                                Active 
                             </label>
                         </div>
                     </div>
                     <div className="col-12 text-center">
                         <button
                             type="submit"
-                            disabled={btnLoading}
-                            className={`btn ${btnLoading ? 'not-allowed' : 'allowed'}`}
+                            disabled={isLoading}
+                            className={`btn ${isLoading ? 'not-allowed' : 'allowed'}`}
                         >
-                            {btnLoading ? "Please Wait..." : "Update Shop Banner"}
+                            {isLoading ? "Please Wait..." : "Add Banner"}
                         </button>
                     </div>
                 </form>
@@ -178,4 +148,4 @@ const EditShopBanner = () => {
     );
 };
 
-export default EditShopBanner;
+export default AddBanner;

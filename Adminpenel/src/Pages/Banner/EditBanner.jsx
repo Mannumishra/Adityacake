@@ -1,18 +1,41 @@
 import axios from 'axios';
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const AddShopBanner = () => {
+const EditBanner = () => {
+    const { id } = useParams();
     const [formData, setFormData] = useState({
         bannerName: '',
         bannerImage: null,
         bannerType: '',
         bannerStatus: false,
     });
-    const [isLoading, setIsLoading] = useState(false);
+    const [previewImage, setPreviewImage] = useState('');
+    const [btnLoading, setBtnLoading] = useState(false);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchBannerData = async () => {
+            try {
+                const response = await axios.get(`http://localhost:8000/api/get-single-banner/${id}`);
+                const banner = response.data.data;
+                setFormData({
+                    bannerName: banner.bannerName,
+                    bannerImage: null,
+                    bannerType: banner.bannerType,
+                    bannerStatus: banner.bannerStatus === 'True',
+                });
+                setPreviewImage(`http://localhost:8000/${banner.bannerImage}`);
+            } catch (error) {
+                console.error("Failed to fetch banner data:", error);
+                toast.error("Failed to load banner data");
+            }
+        };
+
+        fetchBannerData();
+    }, [id]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -23,45 +46,44 @@ const AddShopBanner = () => {
     };
 
     const handleImageChange = (e) => {
+        const file = e.target.files[0];
         setFormData({
             ...formData,
-            bannerImage: e.target.files[0],
+            bannerImage: file,
         });
+        setPreviewImage(URL.createObjectURL(file));
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.bannerName || !formData.bannerImage || !formData.bannerType) {
-            toast.error("All fields are required");
+        if (!formData.bannerName || !formData.bannerType) {
+            toast.error("All fields except image are required");
             return;
         }
 
         const submitData = new FormData();
         submitData.append('bannerName', formData.bannerName);
-        submitData.append('bannerImage', formData.bannerImage);
+        if (formData.bannerImage) submitData.append('bannerImage', formData.bannerImage);
         submitData.append('bannerType', formData.bannerType);
         submitData.append('bannerStatus', formData.bannerStatus ? "True" : "False");
 
         try {
-            setIsLoading(true);
-            const response = await axios.post('http://localhost:8000/api/create-banner', submitData, {
+            setBtnLoading(true);
+            const response = await axios.put(`http://localhost:8000/api/update-banner/${id}`, submitData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            console.log(response)
-           if(response.status===201){
-            toast.success("Banner added successfully");
-            navigate('/all-shop-banners');
-            setIsLoading(false)
-           }
+            if (response.status === 200) {
+                toast.success("Banner updated successfully");
+                navigate('/all-banners');
+            }
         } catch (error) {
-            console.log(error)
-            setIsLoading(false)
-            toast.error("Failed to add banner");
+            console.error("Failed to update banner:", error);
+            toast.error("Failed to update banner");
         } finally {
-            setIsLoading(false);
+            setBtnLoading(false);
         }
     };
 
@@ -70,17 +92,17 @@ const AddShopBanner = () => {
             <ToastContainer />
             <div className="bread">
                 <div className="head">
-                    <h4>Add Shop Banner</h4>
+                    <h4>Edit Shop Banner</h4>
                 </div>
                 <div className="links">
-                    <Link to="/all-shop-banners" className="add-new">Back <i className="fa-regular fa-circle-left"></i></Link>
+                    <Link to="/all-banners" className="add-new">Back <i className="fa-regular fa-circle-left"></i></Link>
                 </div>
             </div>
 
             <div className="d-form">
                 <form className="row g-3" onSubmit={handleSubmit}>
                     <div className="col-md-6">
-                        <label htmlFor="bannerName" className="form-label">Shop Banner Name</label>
+                        <label htmlFor="bannerName" className="form-label">Banner Name</label>
                         <input
                             type="text"
                             name="bannerName"
@@ -92,15 +114,23 @@ const AddShopBanner = () => {
                         />
                     </div>
                     <div className="col-md-6">
-                        <label htmlFor="bannerImage" className="form-label">Shop Banner Image</label>
+                        <label htmlFor="bannerImage" className="form-label">Banner Image</label>
                         <input
                             type="file"
                             name="bannerImage"
                             className="form-control"
                             id="bannerImage"
                             onChange={handleImageChange}
-                            required
                         />
+                    </div>
+                    <div className="col-md-6">
+                        {previewImage && (
+                            <img
+                                src={previewImage}
+                                alt="Banner Preview"
+                                style={{ width: '100px', height: '100px' }}
+                            />
+                        )}
                     </div>
                     <div className="col-md-6">
                         <label htmlFor="bannerType" className="form-label">Banner Type</label>
@@ -112,7 +142,7 @@ const AddShopBanner = () => {
                             onChange={handleChange}
                             required
                         >
-                            <option value="">Select Banner Type</option>
+                            <option value="" selected disabled>Select Banner Type</option>
                             <option value="Desktop">Desktop</option>
                             <option value="Mobile">Mobile</option>
                             <option value="Both">Both</option>
@@ -129,17 +159,17 @@ const AddShopBanner = () => {
                                 onChange={handleChange}
                             />
                             <label className="form-check-label" htmlFor="bannerStatus">
-                                Active 
+                                Active
                             </label>
                         </div>
                     </div>
                     <div className="col-12 text-center">
                         <button
                             type="submit"
-                            disabled={isLoading}
-                            className={`btn ${isLoading ? 'not-allowed' : 'allowed'}`}
+                            disabled={btnLoading}
+                            className={`btn ${btnLoading ? 'not-allowed' : 'allowed'}`}
                         >
-                            {isLoading ? "Please Wait..." : "Add Shop Banner"}
+                            {btnLoading ? "Please Wait..." : "Update Banner"}
                         </button>
                     </div>
                 </form>
@@ -148,4 +178,4 @@ const AddShopBanner = () => {
     );
 };
 
-export default AddShopBanner;
+export default EditBanner;

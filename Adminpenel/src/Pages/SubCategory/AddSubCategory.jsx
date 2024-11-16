@@ -7,37 +7,40 @@ import 'react-toastify/dist/ReactToastify.css';
 const AddSubCategory = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
-        categoryName: '', // This will store the selected main category ID
+        categoryName: '',
         subcategoryName: '',
-        categoryStatus: 'False',
+        subcategoryStatus: 'False',
+        subcategoryImage: null,
     });
-    const [mainCategories, setMainCategories] = useState([]); // For storing fetched categories
+    const [mainCategories, setMainCategories] = useState([]);
     const navigate = useNavigate();
 
-    // Fetch main categories
     useEffect(() => {
         const fetchMainCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:8000/api/get-main-category'); // Adjust the URL to your API endpoint
-                setMainCategories(response.data.data); // Assuming the response structure
+                const response = await axios.get('http://localhost:8000/api/get-main-category');
+                setMainCategories(response.data.data);
             } catch (error) {
                 toast.error("Error fetching main categories");
                 console.error("Error fetching main categories:", error);
             }
         };
-
         fetchMainCategories();
     }, []);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevData => ({ ...prevData, [name]: value }));
+        const { name, value, files } = e.target;
+        if (name === 'subcategoryImage') {
+            setFormData(prevData => ({ ...prevData, subcategoryImage: files[0] }));
+        } else {
+            setFormData(prevData => ({ ...prevData, [name]: value }));
+        }
     };
 
     const handleCheckboxChange = () => {
         setFormData(prevData => ({
             ...prevData,
-            categoryStatus: prevData.categoryStatus === 'True' ? 'False' : 'True'
+            subcategoryStatus: prevData.subcategoryStatus === 'True' ? 'False' : 'True'
         }));
     };
 
@@ -45,17 +48,21 @@ const AddSubCategory = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        const { categoryName, subcategoryName, categoryStatus } = formData;
+        const data = new FormData();
+        data.append('categoryName', formData.categoryName);
+        data.append('subcategoryName', formData.subcategoryName);
+        data.append('subcategoryStatus', formData.subcategoryStatus);
+        if (formData.subcategoryImage) data.append('subcategoryImage', formData.subcategoryImage);
 
         try {
-            const response = await axios.post('http://localhost:8000/api/create-subcategory', {
-                categoryName,
-                subcategoryName,
-                categoryStatus
+            const response = await axios.post('http://localhost:8000/api/create-subcategory', data, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
             });
 
             toast.success(response.data.message);
-            navigate('/all-subcategory'); // Redirect to the subcategory list
+            navigate('/all-subcategory');
         } catch (error) {
             toast.error(error.response?.data?.message || "Error adding subcategory");
             console.error("Error adding subcategory:", error);
@@ -88,10 +95,10 @@ const AddSubCategory = () => {
                             onChange={handleChange}
                             required
                         >
-                            <option value="" selected disabled>Select a category</option>
+                            <option value="" disabled>Select a category</option>
                             {mainCategories.map(category => (
                                 <option key={category._id} value={category._id}>
-                                    {category.mainCategoryName} {/* Adjust this based on your category field */}
+                                    {category.mainCategoryName}
                                 </option>
                             ))}
                         </select>
@@ -108,17 +115,27 @@ const AddSubCategory = () => {
                             required
                         />
                     </div>
+                    <div className="col-md-6">
+                        <label htmlFor="subcategoryImage" className="form-label">Subcategory Image</label>
+                        <input
+                            type="file"
+                            name='subcategoryImage'
+                            className="form-control"
+                            id="subcategoryImage"
+                            onChange={handleChange}
+                        />
+                    </div>
                     <div className="col-12">
                         <div className="form-check">
                             <input
                                 className="form-check-input"
                                 type="checkbox"
-                                name="categoryActive"
-                                id="categoryActive"
-                                checked={formData.categoryStatus === 'True'}
+                                name="subcategoryStatus"
+                                id="subcategoryStatus"
+                                checked={formData.subcategoryStatus === 'True'}
                                 onChange={handleCheckboxChange}
                             />
-                            <label className="form-check-label" htmlFor="categoryActive">
+                            <label className="form-check-label" htmlFor="subcategoryStatus">
                                 Active
                             </label>
                         </div>
@@ -132,6 +149,6 @@ const AddSubCategory = () => {
             </div>
         </>
     );
-}
+};
 
 export default AddSubCategory;

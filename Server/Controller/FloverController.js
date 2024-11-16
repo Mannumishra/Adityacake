@@ -15,7 +15,7 @@ const createFlover = async (req, res) => {
 
         const newFlover = new Flover({
             floverName,
-            floverStatus: floverStatus || "False" // Default to "False" if not provided
+            floverStatus: floverStatus || "False" 
         });
 
         const savedFlover = await newFlover.save();

@@ -1,17 +1,21 @@
 const mongoose = require("mongoose")
 
 const ColorSchema = new mongoose.Schema({
-    colorName:{
-        type:String,
-        required:true
+    colorName: {
+        type: String,
+        required: true
     },
-    colorStatus:{
-        type:String,
-        default:"False"
+    color: {
+        type: String,
+        required: true
+    },
+    colorStatus: {
+        type: String,
+        default: "False"
     }
-},{timestamps:true})
+}, { timestamps: true })
 
 
-const Color = mongoose.model("Color" ,ColorSchema)
+const Color = mongoose.model("Color", ColorSchema)
 
 module.exports = Color

@@ -9,7 +9,8 @@ const EditColor = () => {
     const navigate = useNavigate(); // Hook for programmatic navigation
     const [colorData, setColorData] = useState({
         colorName: '',
-        colorStatus: false // Use boolean for checkbox state
+        color: '', // New color field
+        colorStatus: 'False', // Default as string
     });
     const [btnLoading, setBtnLoading] = useState(false);
 
@@ -17,24 +18,23 @@ const EditColor = () => {
         const fetchColor = async () => {
             try {
                 const response = await axios.get(`http://localhost:8000/api/get-single-color/${id}`);
-                // Convert colorStatus to boolean for easier handling
                 setColorData({
                     ...response.data.data,
-                    colorStatus: response.data.data.colorStatus === 'True' // Assuming the API returns "True" or "False" as strings
+                    colorStatus: response.data.data.colorStatus, // Assuming the API returns "True" or "False" as strings
                 });
             } catch (error) {
                 toast.error(error.response ? error.response.data.message : 'Error fetching color data');
             }
         };
 
-        fetchColor(); // Call the function to fetch color data
+        fetchColor(); // Fetch color data on component mount
     }, [id]);
 
     const handleChange = (e) => {
         const { name, type, checked, value } = e.target;
         setColorData(prevData => ({
             ...prevData,
-            [name]: type === 'checkbox' ? checked : value,
+            [name]: type === 'checkbox' ? (checked ? 'True' : 'False') : value, // Handle checkbox as "True" or "False"
         }));
     };
 
@@ -42,14 +42,8 @@ const EditColor = () => {
         e.preventDefault();
         setBtnLoading(true); // Set loading state to true
 
-        // Convert colorStatus back to string for the API request
-        const updatedData = {
-            ...colorData,
-            colorStatus: colorData.colorStatus ? 'True' : 'False' // Convert boolean back to string
-        };
-
         try {
-            const response = await axios.put(`http://localhost:8000/api/update-color/${id}`, updatedData);
+            const response = await axios.put(`http://localhost:8000/api/update-color/${id}`, colorData);
             toast.success(response.data.message); // Show success message
             navigate('/all-color'); // Redirect to the all colors page
         } catch (error) {
@@ -73,7 +67,7 @@ const EditColor = () => {
 
             <div className="d-form">
                 <form className="row g-3" onSubmit={handleSubmit}>
-                    <div className="col-md-4">
+                    <div className="col-md-6">
                         <label htmlFor="title" className="form-label">Color Name</label>
                         <input
                             type="text"
@@ -86,14 +80,15 @@ const EditColor = () => {
                         />
                     </div>
                     <div className="col-md-6">
-                        <label htmlFor="TagColour" className="form-label">Color</label>
+                        <label htmlFor="color" className="form-label">Color</label>
                         <input
                             type="color"
-                            name='colorName' // Use the same name as colorName for the hex value
+                            name="color"
                             className="form-control"
-                            id="TagColour"
-                            value={colorData.colorName}
-                            onChange={handleChange}
+                            id="color"
+                            value={colorData.color}
+                            onChange={handleChange} // Use the handleChange method
+                            required // Mark as required
                         />
                     </div>
                     <div className="col-md-2">
@@ -103,14 +98,14 @@ const EditColor = () => {
                             name='colorStatus'
                             className="form-check-input"
                             id="colorStatus"
-                            checked={colorData.colorStatus}
+                            checked={colorData.colorStatus === 'True'} // Convert string to boolean for checkbox
                             onChange={handleChange}
                         />
                     </div>
 
                     <div className="col-12 text-center">
                         <button type="submit" disabled={btnLoading} className={`${btnLoading ? 'not-allowed' : 'allowed'}`}>
-                            {btnLoading ? "Please Wait..." : "Update Tag"}
+                            {btnLoading ? "Please Wait..." : "Update Color"}
                         </button>
                     </div>
                 </form>

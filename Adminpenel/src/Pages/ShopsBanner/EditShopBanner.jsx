@@ -4,7 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const EditBanner = () => {
+const EditShopBanner = () => {
     const [btnLoading ,setBtnLoading] = useState(false)
     return (
         <>
@@ -49,4 +49,4 @@ const EditBanner = () => {
     );
 };
 
-export default EditBanner;
+export default EditShopBanner;

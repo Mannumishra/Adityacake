@@ -8,6 +8,7 @@ const AddColor = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
         colorName: '',
+        color: '', // New color field
         colorStatus: 'False', // Default status
     });
     const navigate = useNavigate(); // To programmatically navigate after adding a color
@@ -60,11 +61,23 @@ const AddColor = () => {
                     <div className="col-md-6">
                         <label htmlFor="colorName" className="form-label">Color Name</label>
                         <input
-                            type="color"
-                            name='colorName'
+                            type="text"
+                            name="colorName"
                             className="form-control"
                             id="colorName"
                             value={formData.colorName}
+                            onChange={handleChange} // Use the handleChange method
+                            required // Mark as required
+                        />
+                    </div>
+                    <div className="col-md-6">
+                        <label htmlFor="color" className="form-label">Color</label>
+                        <input
+                            type="color"
+                            name="color"
+                            className="form-control"
+                            id="color"
+                            value={formData.color}
                             onChange={handleChange} // Use the handleChange method
                             required // Mark as required
                         />

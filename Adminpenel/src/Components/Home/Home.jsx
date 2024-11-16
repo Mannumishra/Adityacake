@@ -8,12 +8,6 @@ import AddCategory from '../../Pages/Category/AddCategory'
 import EditCategory from '../../Pages/Category/EditCategory'
 import AllProduct from '../../Pages/Products/AllProduct'
 import AddProduct from '../../Pages/Products/AddProduct'
-import AllBanner from '../../Pages/Banners/AllBanner'
-import AddBanner from '../../Pages/Banners/AddBanner'
-import EditBanner from '../../Pages/Banners/EditBanner'
-import AllShopBanner from '../../Pages/ShopBanner/AllShopBanner'
-import AddShopBanner from '../../Pages/ShopBanner/AddShopBanner'
-import EditShopBanner from '../../Pages/ShopBanner/EditShopBanner'
 import AllTags from '../../Pages/Tags/AllTags'
 import AddTag from '../../Pages/Tags/AddTag'
 import EditTag from '../../Pages/Tags/EditTag'
@@ -34,6 +28,22 @@ import EditSize from '../../Pages/Size/EditSize'
 import AllFlavour from '../../Pages/Flavour/AllFlavour'
 import AddFlavour from '../../Pages/Flavour/AddFlavour'
 import EditFlavour from '../../Pages/Flavour/EditFlavour'
+import AllSBanner from '../../Pages/Banner/AllSBanner'
+import AllShopBanner from '../../Pages/ShopsBanner/AllShopBanner'
+import AddShopBanner from '../../Pages/ShopsBanner/AddShopBanner'
+import EditShopBanner from '../../Pages/ShopsBanner/EditShopBanner'
+import AddBanner from '../../Pages/Banner/AddBanner'
+import EditBanner from '../../Pages/Banner/EditBanner'
+import AllRefrenceCompany from '../../Pages/RefrenceCompany/AllRefrenceCompany'
+import AddRefrenceCompany from '../../Pages/RefrenceCompany/AddRefrenceCompany'
+import EditRefrenceCompany from '../../Pages/RefrenceCompany/EditRefrenceCompany'
+import AllCategoryTitel from '../../Pages/CategoryTitel/AllCategoryTitel'
+import AddCategoryTitel from '../../Pages/CategoryTitel/AddCategoryTitel'
+import EditCategoryTitel from '../../Pages/CategoryTitel/EditCategoryTitel'
+import EditProduct from '../../Pages/Products/EditProduct '
+import AllInnerSubCategory from '../../Pages/InnerSubCategory/AllInnerSubCategory'
+import AddInnerSubCategory from '../../Pages/InnerSubCategory/AddInnerSubCategory'
+import EditInnerSubCategory from '../../Pages/InnerSubCategory/EditInnerSubCategory'
 
 const Home = () => {
   return (
@@ -66,14 +76,19 @@ const Home = () => {
           <Route path={"/edit-size/:id"} element={<EditSize />} />
 
           {/* Flover */}
-          <Route path={"/all-flover"} element={<AllFlavour />} />
+          <Route path={"/all-flower"} element={<AllFlavour />} />
           <Route path={"/add-flover"} element={<AddFlavour />} />
           <Route path={"/edit-flover/:id"} element={<EditFlavour />} />
+
+
+          <Route path={"/all-ref-companies"} element={<AllRefrenceCompany />} />
+          <Route path={"/add-ref-company"} element={<AddRefrenceCompany />} />
+          <Route path={"/edit-ref-company/:id"} element={<EditRefrenceCompany />} />
 
           {/* Product --  */}
           <Route path={"/all-products"} element={<AllProduct />} />
           <Route path={"/add-product"} element={<AddProduct />} />
-          <Route path={"/edit-product/:id"} element={<EditCategory />} />
+          <Route path={"/edit-product/:id"} element={<EditProduct />} />
 
 
           {/* --- Orders --- */}
@@ -89,22 +104,28 @@ const Home = () => {
           <Route path={"/edit-tag/:id"} element={<EditTag />} />
 
           {/* --- Banners --- */}
-          <Route path={"/all-banners"} element={<AllBanner />} />
-          <Route path={"/add-banner"} element={<AddBanner />} />
-          <Route path={"/edit-banner/:id"} element={<EditBanner />} />
-
-          {/* --- Banners --- */}
           <Route path={"/all-shop-banners"} element={<AllShopBanner />} />
           <Route path={"/add-shop-banner"} element={<AddShopBanner />} />
           <Route path={"/edit-shop-banner/:id"} element={<EditShopBanner />} />
+
+          {/* --- Banners --- */}
+          <Route path={"/all-banners"} element={<AllSBanner />} />
+          <Route path={"/add-banner"} element={<AddBanner />} />
+          <Route path={"/edit-banner/:id"} element={<EditBanner />} />
 
           {/* --- Orders --- */}
           <Route path={"/all-orders"} element={<AllOrder />} />
           <Route path={"/edit-order/:id"} element={<EditOrder />} />
 
+          <Route path={"/all-category-titel"} element={<AllCategoryTitel />} />
+          <Route path={"/add-category-titel"} element={<AddCategoryTitel />} />
+          <Route path={"/edit-category-titel/:id"} element={<EditCategoryTitel />} />
 
 
 
+          <Route path={"/all-inner-subcategory"} element={<AllInnerSubCategory />} />
+          <Route path={"/add-innersubcategory"} element={<AddInnerSubCategory />} />
+          <Route path={"/edit-category-titel/:id"} element={<EditInnerSubCategory />} />
 
           {/* all-shop */}
 

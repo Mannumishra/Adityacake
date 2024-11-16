@@ -1,90 +1,166 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const AllProduct = () => {
-    const [data, steData] = useState([])
+    const [products, setProducts] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
 
-    const getApiData = async () => {
-        try {
-            const res = await axios.get("https://ro.digiindiasolutions.com/api/get-task")
-            // console.log(res)
-            steData(res.data.data)
-        } catch (error) {
-            console.log(error)
-        }
-    }
+    // Fetch all products
     useEffect(() => {
-        getApiData()
-    }, [])
+        const fetchProducts = async () => {
+            setIsLoading(true);
+            try {
+                const response = await axios.get("http://localhost:8000/api/all-product");
+                console.log(response)
+                setProducts(response.data.data || []);
+            } catch (error) {
+                console.error("Error fetching products:", error);
+                toast.error("Failed to fetch products!");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    // Handle product deletion
+    const handleDelete = async (productId) => {
+        const confirm = await Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "Cancel",
+        });
+
+        if (confirm.isConfirmed) {
+            try {
+                await axios.delete(`http://localhost:8000/api/delete-product/${productId}`);
+                setProducts(products.filter(product => product._id !== productId));
+                toast.success("Product deleted successfully!");
+            } catch (error) {
+                console.error("Error deleting product:", error);
+                toast.error("Failed to delete product!");
+            }
+        }
+    };
+
+    // Filter products based on search
+    const filteredProducts = products.filter((product) =>
+        product.productName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <>
             <ToastContainer />
             <div className="bread">
                 <div className="head">
-                    <h4>All Product List </h4>
+                    <h4>All Product List</h4>
                 </div>
                 <div className="links">
-                    <Link to="/add-product" className="add-new">Add New <i class="fa-solid fa-plus"></i></Link>
+                    <Link to="/add-product" className="add-new">
+                        Add New <i className="fa-solid fa-plus"></i>
+                    </Link>
                 </div>
             </div>
 
             <div className="filteration">
-                <div className="selects">
-                    {/* <select>
-                        <option>Ascending Order </option>
-                        <option>Descending Order </option>
-                    </select> */}
-                </div>
                 <div className="search">
-                    <label htmlFor="search">Search </label> &nbsp;
-                    <input type="text" name="search" id="search" />
+                    <label htmlFor="search">Search</label> &nbsp;
+                    <input
+                        type="text"
+                        name="search"
+                        id="search"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                 </div>
             </div>
 
-            <section className="d-table ">
-                <table class="table table-bordered table-striped table-hover">
+            <section className="d-table">
+                <table className="table table-bordered table-striped table-hover">
                     <thead>
                         <tr>
-                            <th scope="col">Sr.No.</th>
-                            <th scope="col">Customer Name</th>
-                            <th scope="col">Custmor Mobile</th>
-                            <th scope="col">Looking For</th>
-                            <th scope="col">Perpose of wisit</th>
-                            <th scope="col">field Exicutive name</th>
-                            <th scope="col">field Exicutive ID</th>
-                            <th scope="col">Date</th>
-                            <th scope="col">Time</th>
-                            <th scope="col">Edit</th>
-                            <th scope="col">Delete</th>
+                            <th>#</th>
+                            <th>Category</th>
+                            <th>Subcategory</th>
+                            <th>Product Name</th>
+                            <th>Description</th>
+                            <th>Variants</th>
+                            <th>Images</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {
-                            data.map((item, index) =>
-                                <tr key={index}>
-                                    <th scope="row">{index+1}</th>
-                                    <td>{item.customerName.customerName}</td>
-                                    <td>{item.customerName.mobileNumber}</td>
-                                    <td>{item.lookingFor.lookingFor}</td>
-                                    <td>{item.visitePurpose.visitePurpose}</td>
-                                    <td>{item.fieldExecutiveName.name}</td>
-                                    <td>{item.fieldExecutiveName.vendorId}</td>
-                                    <td>{item.date}</td>
-                                    <td>{item.time}</td>
-                                    <td><Link className="bt edit">Edit <i class="fa-solid fa-pen-to-square"></i></Link></td>
-                                    <td><Link className="bt delete" >Delete <i class="fa-solid fa-trash"></i></Link></td>
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="8" className="text-center">
+                                    Loading...
+                                </td>
+                            </tr>
+                        ) : filteredProducts.length === 0 ? (
+                            <tr>
+                                <td colSpan="8" className="text-center">
+                                    No products found.
+                                </td>
+                            </tr>
+                        ) : (
+                            filteredProducts.map((product, index) => (
+                                <tr key={product._id}>
+                                    <td>{index + 1}</td>
+                                    <td>{product.categoryName?.mainCategoryName || "N/A"}</td>
+                                    <td>{product.subcategoryName?.subcategoryName || "N/A"}</td>
+                                    <td>{product.productName}</td>
+                                    <td>{product.productDescription}</td>
+                                    <td>
+                                        {product.Variant.map((variant, idx) => (
+                                            <div key={idx}>
+                                                <strong>Color:</strong> {variant.color?.colorName || "N/A"},
+                                                <strong> Weight:</strong> {variant.weight?.name || "N/A"},
+                                                <strong> Price:</strong> ₹{variant.finalPrice}
+                                            </div>
+                                        ))}
+                                    </td>
+                                    <td>
+                                        {product.productImage.map((image, imgIndex) => (
+                                            <img
+                                                key={imgIndex}
+                                                src={image}
+                                                alt="Product"
+                                                style={{ width: "50px", marginRight: "5px" }}
+                                            />
+                                        ))}
+                                    </td>
+                                    <td>
+                                        <Link
+                                            to={`/edit-product/${product._id}`}
+                                            className="btn btn-sm btn-primary"
+                                        >
+                                            Edit
+                                        </Link>
+                                        &nbsp;
+                                        <button
+                                            onClick={() => handleDelete(product._id)}
+                                            className="btn btn-sm btn-danger"
+                                        >
+                                            Delete
+                                        </button>
+                                    </td>
                                 </tr>
-                            )
-                        }
+                            ))
+                        )}
                     </tbody>
                 </table>
             </section>
         </>
-    )
-}
+    );
+};
 
-export default AllProduct
+export default AllProduct;

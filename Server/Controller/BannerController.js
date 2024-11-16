@@ -2,6 +2,18 @@ const fs = require("fs");
 const path = require("path");
 const Banner = require("../Model/BannerModel");
 
+
+const deleteImageFile = (relativeFilePath) => {
+    const absolutePath = path.join(__dirname, "..", relativeFilePath);
+    fs.unlink(absolutePath, (err) => {
+        if (err) {
+            console.error("Failed to delete image:", err);
+        } else {
+            console.log("Image deleted:", absolutePath);
+        }
+    });
+};
+
 const createBanner = async (req, res) => {
     console.log(req.body)
     try {
@@ -61,7 +73,7 @@ const updateBanner = async (req, res) => {
 
         // Delete old image if a new one is uploaded
         if (req.file && banner.bannerImage) {
-            fs.unlinkSync(banner.bannerImage);
+            deleteImageFile(banner.bannerImage);
             banner.bannerImage = req.file.path;
         }
 
@@ -73,7 +85,7 @@ const updateBanner = async (req, res) => {
         await banner.save();
         res.status(200).json({ success: true, data: banner });
     } catch (error) {
-        if (req.file) fs.unlinkSync(req.file.path); // Delete new image if there’s an error
+        if (req.file) deleteImageFile(req.file.path); // Delete new image if there’s an error
         console.error(error);
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
@@ -86,7 +98,7 @@ const deleteBanner = async (req, res) => {
         if (!banner) return res.status(404).json({ success: false, message: "Banner not found" });
 
         // Delete the image file
-        if (banner.bannerImage) fs.unlinkSync(banner.bannerImage);
+        if (banner.bannerImage) deleteImageFile(banner.bannerImage);
 
         res.status(200).json({ success: true, message: "Banner deleted successfully" });
     } catch (error) {

@@ -5,7 +5,7 @@ import Swal from 'sweetalert2';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const AllBanner = () => {
+const AllShopBanner = () => {
   
   return (
         <>
@@ -60,4 +60,4 @@ const AllBanner = () => {
     )
 }
 
-export default AllBanner
+export default AllShopBanner

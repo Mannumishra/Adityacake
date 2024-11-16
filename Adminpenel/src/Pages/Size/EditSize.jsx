@@ -85,7 +85,7 @@ const EditSize = () => {
                             required
                         />
                     </div>
-                    <div className="col-md-2">
+                    <div className="col-md-12">
                         <label htmlFor="sizeStatus" className="form-label">Active</label>
                         <input
                             type="checkbox"

@@ -10,7 +10,8 @@ const EditSubCategory = () => {
     const [formData, setFormData] = useState({
         categoryName: '', // This will store the selected main category ID
         subcategoryName: '',
-        categoryStatus: 'False',
+        subcategoryStatus: 'False',
+        subcategoryImage: null,
     });
     const [mainCategories, setMainCategories] = useState([]); // For storing fetched categories
     const [isLoading, setIsLoading] = useState(false);
@@ -29,12 +30,14 @@ const EditSubCategory = () => {
 
         const fetchSubCategory = async () => {
             try {
-                const response = await axios.get(`http://localhost:8000/api/get-single-subcategory/${id}`); // Fetch subcategory details
-                const { categoryName, subcategoryName, categoryStatus } = response.data.data; // Adjust based on your API response
+                const response = await axios.get(`http://localhost:8000/api/get-single-subcategory/${id}`);
+                const { categoryName, subcategoryName, subcategoryStatus, subcategoryImage } = response.data.data;
+
                 setFormData({
-                    categoryName, // ID of the main category
+                    categoryName: categoryName?._id || categoryName, // Use `_id` if `categoryName` is an object
                     subcategoryName,
-                    categoryStatus: categoryStatus === 'True' ? 'True' : 'False',
+                    subcategoryImage,
+                    subcategoryStatus: subcategoryStatus === 'True' ? 'True' : 'False',
                 });
             } catch (error) {
                 toast.error('Error fetching subcategory data');
@@ -42,38 +45,43 @@ const EditSubCategory = () => {
             }
         };
 
+
         fetchMainCategories();
         fetchSubCategory();
     }, [id]);
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevData => ({ ...prevData, [name]: value }));
+        const { name, value, files } = e.target;
+        if (name === 'subcategoryImage') {
+            setFormData(prevData => ({ ...prevData, subcategoryImage: files[0] }));
+        } else {
+            setFormData(prevData => ({ ...prevData, [name]: value }));
+        }
     };
-    
+
+
     const handleCheckboxChange = () => {
         setFormData(prevData => ({
             ...prevData,
-            categoryStatus: prevData.categoryStatus === 'True' ? 'False' : 'True'
+            subcategoryStatus: prevData.subcategoryStatus === 'True' ? 'False' : 'True'
         }));
     };
-    
-    
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-    
-        const { categoryName, subcategoryName, categoryStatus } = formData;
-    
+
+        const data = new FormData();
+        data.append('categoryName', formData.categoryName); // Ensure it's only the ID
+        data.append('subcategoryName', formData.subcategoryName);
+        data.append('subcategoryStatus', formData.subcategoryStatus);
+        if (formData.subcategoryImage) data.append('subcategoryImage', formData.subcategoryImage);
+
         try {
-            const response = await axios.put(`http://localhost:8000/api/update-subcategory/${id}`, {
-                categoryName,
-                subcategoryName,
-                subcategoryStatus: categoryStatus // Make sure to include this
-            });
-    
+            const response = await axios.put(`http://localhost:8000/api/update-subcategory/${id}`, data);
             toast.success(response.data.message);
-            navigate('/all-subcategory'); // Redirect to the subcategory list
+            navigate('/all-subcategory');
         } catch (error) {
             toast.error(error.response?.data?.message || "Error updating subcategory");
             console.error("Error updating subcategory:", error);
@@ -81,7 +89,8 @@ const EditSubCategory = () => {
             setIsLoading(false);
         }
     };
-    
+
+
 
     return (
         <>
@@ -127,6 +136,16 @@ const EditSubCategory = () => {
                             required
                         />
                     </div>
+                    <div className="col-md-6">
+                        <label htmlFor="subcategoryImage" className="form-label">Subcategory Image</label>
+                        <input
+                            type="file"
+                            name='subcategoryImage'
+                            className="form-control"
+                            id="subcategoryImage"
+                            onChange={handleChange}
+                        />
+                    </div>
                     <div className="col-12">
                         <div className="form-check">
                             <input
@@ -134,7 +153,7 @@ const EditSubCategory = () => {
                                 type="checkbox"
                                 name="categoryActive"
                                 id="categoryActive"
-                                checked={formData.categoryStatus === 'True'}
+                                checked={formData.subcategoryStatus === 'True'}
                                 onChange={handleCheckboxChange}
                             />
                             <label className="form-check-label" htmlFor="categoryActive">
