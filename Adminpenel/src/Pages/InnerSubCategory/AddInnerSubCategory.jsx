@@ -9,9 +9,9 @@ const AddInnerSubCategory = () => {
     const [formData, setFormData] = useState({
         categoryName: '',
         subcategoryName: '',
-        innerSubcategoryName: '', // Added field for inner subcategory
+        innerSubcategoryName: '',
         subcategoryStatus: 'False',
-        Image: null,
+        Image: null, // Handle image as file
     });
     const [mainCategories, setMainCategories] = useState([]);
     const [subCategories, setSubCategories] = useState([]);
@@ -36,22 +36,38 @@ const AddInnerSubCategory = () => {
                 const response = await axios.get('http://localhost:8000/api/get-subcategory');
                 setSubCategories(response.data.data);
             } catch (error) {
-                toast.error("Error fetching main categories");
-                console.error("Error fetching main categories:", error);
+                toast.error("Error fetching subcategories");
+                console.error("Error fetching subcategories:", error);
             }
         };
         fetchSubCategories();
     }, []);
 
-
     const handleChange = (e) => {
-        const { name, value, files } = e.target;
-        if (name === 'Image') {
-            setFormData(prevData => ({ ...prevData, Image: files[0] }));
+        const { name, value, type, files } = e.target;
+
+        if (type === 'file') {
+            setFormData({
+                ...formData,
+                [name]: files[0], // Handle file input for images
+            });
         } else {
-            setFormData(prevData => ({ ...prevData, [name]: value }));
+            setFormData({
+                ...formData,
+                [name]: value,
+            });
+        }
+
+        // If categoryName changes, filter subcategories
+        if (name === 'categoryName') {
+            const filteredSubcategories = subCategories.filter(
+                (subcategory) => subcategory.categoryName._id === value
+            );
+            setFilteredSubcategories(filteredSubcategories);
         }
     };
+
+    const [filteredSubcategories, setFilteredSubcategories] = useState([]);
 
     const handleCheckboxChange = () => {
         setFormData(prevData => ({
@@ -66,13 +82,13 @@ const AddInnerSubCategory = () => {
 
         const data = new FormData();
         data.append('categoryName', formData.categoryName);
-        data.append('subcategoryName', formData.subcategoryName);  // Keeping subcategoryName
-        data.append('innerSubcategoryName', formData.innerSubcategoryName);  // Added for inner subcategory
+        data.append('subcategoryName', formData.subcategoryName);
+        data.append('innerSubcategoryName', formData.innerSubcategoryName);
         data.append('subcategoryStatus', formData.subcategoryStatus);
-        if (formData.Image) data.append('Image', formData.Image);
+        if (formData.Image) data.append('Image', formData.Image);  // Appending image file to FormData
 
         try {
-            const response = await axios.post('http://localhost:8000/api/create-inner-subcategory', data, {  // Updated API endpoint
+            const response = await axios.post('http://localhost:8000/api/create-inner-subcategory', data, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -125,13 +141,13 @@ const AddInnerSubCategory = () => {
                         <select
                             name='subcategoryName'
                             className="form-control"
-                            id="categoryName"
+                            id="subcategoryName"
                             value={formData.subcategoryName}
                             onChange={handleChange}
                             required
                         >
-                            <option value="" selected disabled>Select a category</option>
-                            {subCategories.map(category => (
+                            <option value="" selected disabled>Select a subcategory</option>
+                            {filteredSubcategories.map(category => (
                                 <option key={category._id} value={category._id}>
                                     {category.subcategoryName}
                                 </option>

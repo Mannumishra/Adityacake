@@ -18,7 +18,7 @@ const deleteImageFile = (relativeFilePath) => {
 // Create Product
 const createProduct = async (req, res) => {
     console.log(req.body)
-    const { categoryName, subcategoryName, productName, productSubDescription, productDescription, productTag, refrenceCompany, Variant } = req.body;
+    const { categoryName, subcategoryName, productName, productSubDescription, productDescription, productTag, refrenceCompany, Variant ,refrenceCompanyUrl,innersubcategoryName} = req.body;
     const errorMessage = [];
 
     // Validation for required fields
@@ -54,6 +54,8 @@ const createProduct = async (req, res) => {
         productDescription,
         productTag,
         refrenceCompany,
+        innersubcategoryName,
+        refrenceCompanyUrl,
         Variant: JSON.parse(Variant), // Assuming it's a stringified JSON
         productImage: req.files.map(file => file.path), // Save paths to the uploaded images
     };
@@ -70,12 +72,30 @@ const createProduct = async (req, res) => {
 // Read Products
 const getProducts = async (req, res) => {
     try {
-        const products = await Product.find().populate('categoryName subcategoryName productTag refrenceCompany');
+        const products = await Product.find()
+            .populate('categoryName')
+            .populate('subcategoryName')
+            .populate('productTag')
+            .populate('refrenceCompany')
+            .populate({
+                path: 'Variant.color',
+                model: 'Color',
+            })
+            .populate({
+                path: 'Variant.weight',
+                model: 'Size',
+            })
+            .populate({
+                path: 'Variant.flover',
+                model: 'Flover',
+            });
+
         res.status(200).json({ data: products });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 // Get Single Product
 const getProduct = async (req, res) => {
@@ -104,6 +124,8 @@ const updateProduct = async (req, res) => {
         productDescription: req.body.productDescription,
         productTag: req.body.productTag,
         refrenceCompany: req.body.refrenceCompany,
+        refrenceCompanyUrl:req.body.refrenceCompanyUrl,
+        innersubcategoryName:req.body.innersubcategoryName,
         Variant: JSON.parse(req.body.Variant), // Assuming it's a stringified JSON
     };
 

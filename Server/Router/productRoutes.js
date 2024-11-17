@@ -7,6 +7,6 @@ ProductRouter.post('/create-product', upload.array("productImage", 5), createPro
 ProductRouter.get('/all-product', getProducts);
 ProductRouter.get('/get-single-product/:id', getProduct);
 ProductRouter.put('/update-product/:id', upload.array("productImage", 5), updateProduct);
-ProductRouter.delete('delete-product/:id', deleteProduct);
+ProductRouter.delete('/delete-product/:id', deleteProduct);
 
 module.exports = ProductRouter;

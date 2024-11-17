@@ -125,7 +125,7 @@ const Home = () => {
 
           <Route path={"/all-inner-subcategory"} element={<AllInnerSubCategory />} />
           <Route path={"/add-innersubcategory"} element={<AddInnerSubCategory />} />
-          <Route path={"/edit-category-titel/:id"} element={<EditInnerSubCategory />} />
+          <Route path={"/edit-innersubcategory/:id"} element={<EditInnerSubCategory />} />
 
           {/* all-shop */}
 

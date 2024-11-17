@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 import { Link } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -23,6 +24,29 @@ const AllInnerSubCategory = () => {
 
         fetchInnerSubCategories();
     }, []);
+
+    const handleDelete = async (id) => {
+        try {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            });
+
+            if (result.isConfirmed) {
+                await axios.delete(`http://localhost:8000/api/delete-inner-subcategory/${id}`);
+                setInnerSubcategories(innerSubcategories.filter(subcategory => subcategory._id !== id));
+                toast.success("Inner subcategory deleted successfully");
+            }
+        } catch (error) {
+            toast.error("Failed to delete the inner subcategory");
+            console.error("Error deleting inner subcategory:", error);
+        }
+    };
 
     if (isLoading) {
         return <p>Loading subcategories...</p>; // Loading state
@@ -65,6 +89,16 @@ const AllInnerSubCategory = () => {
                                     <img src={`http://localhost:8000/${subcategory.Image}`} alt={subcategory.innerSubcategoryName} style={{ width: '50px', height: '50px' }} />
                                 </td>
                                 <td>{subcategory.Status}</td>
+                                <td>
+                                    <Link to={`/edit-innersubcategory/${subcategory._id}`} className="btn btn-primary">
+                                        Edit
+                                    </Link>
+                                </td>
+                                <td>
+                                    <button onClick={() => handleDelete(subcategory._id)} className="btn btn-danger">
+                                        Delete
+                                    </button>
+                                </td>
                             </tr>
                         )}
                     </tbody>
@@ -72,6 +106,6 @@ const AllInnerSubCategory = () => {
             </section>
         </>
     );
-}
+};
 
 export default AllInnerSubCategory;

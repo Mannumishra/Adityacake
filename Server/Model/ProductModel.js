@@ -49,6 +49,10 @@ const productSchema = new mongoose.Schema({
         ref: "Subcategory",
         required: true
     },
+    innersubcategoryName: {
+        type: mongoose.Schema.ObjectId,
+        ref: "InnerSubcategory",
+    },
     productName: {
         type: String,
         required: true,
@@ -68,6 +72,9 @@ const productSchema = new mongoose.Schema({
     refrenceCompany: {
         type: mongoose.Schema.ObjectId,
         ref: "RefrenceCompany"
+    },
+    refrenceCompanyUrl: {
+        type: String,
     },
     Variant: {
         type: [VariantSchema],

@@ -123,7 +123,8 @@ const AllProduct = () => {
                                         {product.Variant.map((variant, idx) => (
                                             <div key={idx}>
                                                 <strong>Color:</strong> {variant.color?.colorName || "N/A"},
-                                                <strong> Weight:</strong> {variant.weight?.name || "N/A"},
+                                                <strong> Weight:</strong> {variant.weight?.sizeweight || "N/A"},
+                                                <strong> Flower:</strong> {variant.flover?.floverName || "N/A"},
                                                 <strong> Price:</strong> ₹{variant.finalPrice}
                                             </div>
                                         ))}
@@ -132,7 +133,7 @@ const AllProduct = () => {
                                         {product.productImage.map((image, imgIndex) => (
                                             <img
                                                 key={imgIndex}
-                                                src={image}
+                                                src={`http://localhost:8000/${image}`}
                                                 alt="Product"
                                                 style={{ width: "50px", marginRight: "5px" }}
                                             />

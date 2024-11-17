@@ -139,11 +139,6 @@ exports.updateInnerSubcategory = async (req, res) => {
 exports.deleteInnerSubcategory = async (req, res) => {
     try {
         const { id } = req.params;
-
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return res.status(400).json({ message: "Invalid ID format." });
-        }
-
         const innerSubcategory = await InnerSubcategory.findById(id);
 
         if (!innerSubcategory) {
@@ -156,7 +151,7 @@ exports.deleteInnerSubcategory = async (req, res) => {
         }
 
         // Delete the inner subcategory from the database
-        await innerSubcategory.remove();
+        await innerSubcategory.deleteOne();
 
         res.status(200).json({
             message: "Inner Subcategory deleted successfully.",

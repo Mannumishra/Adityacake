@@ -1,11 +1,12 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const EditProduct = () => {
     const { id } = useParams(); // Get product ID from URL
+    const navigate = useNavigate()
     console.log(id);
     const [isLoading, setIsLoading] = useState(false);
     const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ const EditProduct = () => {
         productSubDescription: "",
         refrenceCompany: "",
         productTag: "",
+        refrenceCompanyUrl: "",
         Variant: [
             {
                 color: "",
@@ -101,7 +103,18 @@ const EditProduct = () => {
             ...formData,
             [name]: value,
         });
+
+        // If categoryName changes, filter subcategories
+        if (name === 'categoryName') {
+            const filteredSubcategories = subcategories.filter(
+                (subcategory) => subcategory.categoryName._id === value
+            );
+            setFilteredSubcategories(filteredSubcategories);
+        }
     };
+
+    // State to store filtered subcategories
+    const [filteredSubcategories, setFilteredSubcategories] = useState([]);
 
     // Handle file change for images
     const handleFileChange = (e) => {
@@ -173,6 +186,7 @@ const EditProduct = () => {
         form.append("productSubDescription", formData.productSubDescription);
         form.append("refrenceCompany", formData.refrenceCompany);
         form.append("productTag", formData.productTag);
+        form.append("refrenceCompanyUrl", formData.refrenceCompanyUrl)
 
         // Append variants
         form.append("Variant", JSON.stringify(formData.Variant));
@@ -189,6 +203,7 @@ const EditProduct = () => {
                 },
             });
             toast.success("Product updated successfully!");
+            navigate("/all-products")
         } catch (err) {
             console.log(err)
             toast.error("Error updating product!");
@@ -214,7 +229,7 @@ const EditProduct = () => {
             <div className="d-form">
                 <form className="row g-3" onSubmit={handleSubmit}>
                     <div className="col-md-4">
-                        <label htmlFor="categoryName" className="form-label">Category Name</label>
+                        <label htmlFor="categoryName" className="form-label">Category Name<sup className="text-danger">*</sup></label>
                         <select name="categoryName" className="form-select" id="categoryName" value={formData.categoryName} onChange={handleChange}>
                             <option value="" disabled>Select Category</option>
                             {categories.map((item, index) => (
@@ -226,33 +241,38 @@ const EditProduct = () => {
                     </div>
 
                     <div className="col-md-4">
-                        <label htmlFor="subcategoryName" className="form-label">Subcategory Name</label>
-                        <select name="subcategoryName" className="form-select" id="subcategoryName" value={formData.subcategoryName} onChange={handleChange}>
-                            <option value="" disabled>Select Subcategory</option>
-                            {subcategories.map((item, index) => (
-                                <option key={index} value={item._id}>
-                                    {item.subcategoryName}
-                                </option>
+                        <label htmlFor="subcategoryName" className="form-label">Subcategory Name<sup className="text-danger">*</sup></label>
+                        <select
+                            name="subcategoryName"
+                            className="form-select"
+                            id="subcategoryName"
+                            value={formData.subcategoryName}
+                            onChange={handleChange}
+                            // required
+                        >
+                            <option value="" selected disabled>Select Subcategory</option>
+                            {filteredSubcategories.map((item, index) => (
+                                <option key={index} value={item._id}>{item.subcategoryName}</option>
                             ))}
                         </select>
                     </div>
 
                     <div className="col-md-4">
-                        <label htmlFor="productName" className="form-label">Product Name</label>
+                        <label htmlFor="productName" className="form-label">Product Name<sup className="text-danger">*</sup></label>
                         <input type="text" name='productName' className="form-control" id="productName" value={formData.productName} onChange={handleChange} />
                     </div>
 
                     <div className="col-md-12">
-                        <label htmlFor="productDescription" className="form-label">Product Description</label>
+                        <label htmlFor="productDescription" className="form-label">Product Description<sup className="text-danger">*</sup></label>
                         <textarea name='productDescription' className="form-control" id="productDescription" value={formData.productDescription} onChange={handleChange} />
                     </div>
 
                     <div className="col-md-12">
-                        <label htmlFor="productSubDescription" className="form-label">Product Sub Description</label>
+                        <label htmlFor="productSubDescription" className="form-label">Product Sub Description<sup className="text-danger">*</sup></label>
                         <textarea name='productSubDescription' className="form-control" id="productSubDescription" value={formData.productSubDescription} onChange={handleChange} />
                     </div>
                     <div className="col-md-4">
-                        <label htmlFor="productTag" className="form-label">Product Tag</label>
+                        <label htmlFor="productTag" className="form-label">Product Tag<sup className="text-danger">*</sup></label>
                         <select name='productTag' className="form-select" id="productTag" value={formData.productTag} onChange={handleChange}>
                             <option value="" selected disabled>Select Category</option>
                             {
@@ -263,7 +283,7 @@ const EditProduct = () => {
                         </select>
                     </div>
                     <div className="col-md-4">
-                        <label htmlFor="refrenceCompany" className="form-label">Refrence Company</label>
+                        <label htmlFor="refrenceCompany" className="form-label">Refrence Company<sup className="text-danger">*</sup></label>
                         <select name='refrenceCompany' className="form-select" id="refrenceCompany" value={formData.refrenceCompany} onChange={handleChange}>
                             <option value="" selected disabled>Select Category</option>
                             {
@@ -274,14 +294,20 @@ const EditProduct = () => {
                         </select>
                     </div>
 
+                    <div className="col-md-4">
+                        <label htmlFor="refrenceCompanyUrl" className="form-label">Company Refrence Url<sup className="text-danger">*</sup></label>
+                        <input type="text" name="refrenceCompanyUrl" id="refrenceCompanyUrl" className='form-control' value={formData.refrenceCompanyUrl} onChange={handleChange} />
+                    </div>
+
+
                     {/* Variant Fields */}
                     <div className="col-md-12">
-                        <label className="form-label">Product Variants</label>
+                        <label className="form-label">Product Variants<sup className="text-danger">*</sup></label>
                         {formData.Variant.map((variant, index) => (
                             <div key={index} className="variant-container">
                                 <div className="row">
                                     <div className="col-md-3">
-                                        <label htmlFor={`color-${index}`} className="form-label">Color</label>
+                                        <label htmlFor={`color-${index}`} className="form-label">Color<sup className="text-danger">*</sup></label>
                                         <select
                                             name="color"
                                             className="form-select"
@@ -299,7 +325,7 @@ const EditProduct = () => {
                                     </div>
 
                                     <div className="col-md-3">
-                                        <label htmlFor={`weight-${index}`} className="form-label">Weight</label>
+                                        <label htmlFor={`weight-${index}`} className="form-label">Weight<sup className="text-danger">*</sup></label>
                                         <select
                                             name="weight"
                                             className="form-select"
@@ -317,7 +343,7 @@ const EditProduct = () => {
                                     </div>
 
                                     <div className="col-md-3">
-                                        <label htmlFor={`flover-${index}`} className="form-label">Flover</label>
+                                        <label htmlFor={`flover-${index}`} className="form-label">Flover<sup className="text-danger">*</sup></label>
                                         <select
                                             name="flover"
                                             className="form-select"
@@ -335,7 +361,7 @@ const EditProduct = () => {
                                     </div>
 
                                     <div className="col-md-3">
-                                        <label htmlFor={`price-${index}`} className="form-label">Price</label>
+                                        <label htmlFor={`price-${index}`} className="form-label">Price<sup className="text-danger">*</sup></label>
                                         <input
                                             type="number"
                                             name="price"
@@ -348,7 +374,7 @@ const EditProduct = () => {
 
                                 <div className="row mt-2">
                                     <div className="col-md-3">
-                                        <label htmlFor={`discountPrice-${index}`} className="form-label">Discount Price</label>
+                                        <label htmlFor={`discountPrice-${index}`} className="form-label">Discount Price<sup className="text-danger">*</sup></label>
                                         <input
                                             type="number"
                                             name="discountPrice"
@@ -358,7 +384,7 @@ const EditProduct = () => {
                                         />
                                     </div>
                                     <div className="col-md-3">
-                                        <label htmlFor={`finalPrice-${index}`} className="form-label">Final Price</label>
+                                        <label htmlFor={`finalPrice-${index}`} className="form-label">Final Price<sup className="text-danger">*</sup></label>
                                         <input
                                             type="number"
                                             name="finalPrice"
@@ -368,7 +394,7 @@ const EditProduct = () => {
                                         />
                                     </div>
                                     <div className="col-md-3">
-                                        <label htmlFor={`stock-${index}`} className="form-label">Stock</label>
+                                        <label htmlFor={`stock-${index}`} className="form-label">Stock<sup className="text-danger">*</sup></label>
                                         <input
                                             type="number"
                                             name="stock"
@@ -378,7 +404,7 @@ const EditProduct = () => {
                                         />
                                     </div>
                                     <div className="col-md-3">
-                                        <label className="form-label">Eggless</label>
+                                        <label className="form-label">Eggless<sup className="text-danger">*</sup></label>
                                         <div className="form-check">
                                             <input
                                                 type="radio"
@@ -389,7 +415,7 @@ const EditProduct = () => {
                                                 checked={variant.eggLess === true}
                                                 onChange={(e) => handleVariantChange(index, { target: { name: 'eggLess', value: true } })}
                                             />
-                                            <label htmlFor={`eggLess-yes-${index}`} className="form-check-label">Eggless</label>
+                                            <label htmlFor={`eggLess-yes-${index}`} className="form-check-label">Eggless<sup className="text-danger">*</sup></label>
                                         </div>
                                         <div className="form-check">
                                             <input
@@ -401,7 +427,7 @@ const EditProduct = () => {
                                                 checked={variant.eggLess === false}
                                                 onChange={(e) => handleVariantChange(index, { target: { name: 'eggLess', value: false } })}
                                             />
-                                            <label htmlFor={`eggLess-no-${index}`} className="form-check-label">Egg</label>
+                                            <label htmlFor={`eggLess-no-${index}`} className="form-check-label">Egg<sup className="text-danger">*</sup></label>
                                         </div>
                                     </div>
 
@@ -414,13 +440,13 @@ const EditProduct = () => {
                     </div>
 
                     <div className="col-md-6">
-                        <label htmlFor="productImage" className="form-label">Product Images</label>
+                        <label htmlFor="productImage" className="form-label">Product Images<sup className="text-danger">*</sup></label>
                         <input type="file" className="form-control" id="productImage" name="productImage" multiple onChange={handleFileChange} />
                     </div>
 
                     <div className="col-md-12 text-center">
                         <button type="submit" className="btn btn-success" disabled={isLoading}>
-                            {isLoading ? 'Adding...' : 'Add Product'}
+                            {isLoading ? 'Adding...' : 'Update Product'}
                         </button>
                     </div>
                 </form>
