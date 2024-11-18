@@ -78,7 +78,7 @@ const AllCategory = () => {
                 </div>
             </div>
 
-            <section className="d-table ">
+            <section className="main-table ">
                 <table className="table table-bordered table-striped table-hover">
                     <thead>
                         <tr>

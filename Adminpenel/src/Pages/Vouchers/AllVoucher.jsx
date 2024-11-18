@@ -14,7 +14,7 @@ const AllVoucher = () => {
                     <Link to="/add-voucher" className="add-new">Add New <i class="fa-solid fa-plus"></i></Link>
                 </div>
             </div>
-            <section className=" mt-2 d-table table-responsive">
+            <section className=" mt-2 main-table table-responsive">
                 <table class="table table-bordered table-striped table-hover">
                     <thead>
                         <tr>

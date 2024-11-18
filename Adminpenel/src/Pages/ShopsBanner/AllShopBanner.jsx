@@ -32,7 +32,7 @@ const AllShopBanner = () => {
                 </div>
             </div>
 
-            <section className="d-table ">
+            <section className="main-table ">
                 <table class="table table-bordered table-striped table-hover">
                     <thead>
                         <tr>

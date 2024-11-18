@@ -13,7 +13,7 @@ const AllUsers = () => {
                 </div>
             </div>
 
-            <section className="d-table">
+            <section className="main-table">
             <div className="table-responsive mt-4">
                 <table className="table table-bordered table-striped table-hover">
                     <thead>
