@@ -12,6 +12,7 @@ const EditProduct = () => {
     const [formData, setFormData] = useState({
         categoryName: "",
         subcategoryName: "",
+        innersubcategoryName: '',
         productName: "",
         productDescription: "",
         productSubDescription: "",
@@ -36,11 +37,18 @@ const EditProduct = () => {
     // State to store dynamic data
     const [categories, setCategories] = useState([]);
     const [subcategories, setSubcategories] = useState([]);
+    const [innersubcategories, setInnersubcategories] = useState([]);
     const [colors, setColors] = useState([]);
     const [flowers, setFlowers] = useState([]);
     const [weights, setWeights] = useState([]);
     const [refCompany, setRefCompany] = useState([]);
     const [tag, setTag] = useState([]);
+
+
+    // State to store filtered subcategories
+    const [filteredSubcategories, setFilteredSubcategories] = useState([]);
+    const [filteredInnersubcategories, setFilteredInnersubcategories] = useState([]);
+
 
     // Fetch product details and dynamic data
     useEffect(() => {
@@ -65,8 +73,11 @@ const EditProduct = () => {
                 );
                 const tagResponse = await axios.get("http://localhost:8000/api/get-tags");
 
+                const innersubcategoryResponse = await axios.get('http://localhost:8000/api/get-inner-subcategory');
+
                 setCategories(categoryResponse.data.data);
                 setSubcategories(subcategoryResponse.data.data);
+                setInnersubcategories(innersubcategoryResponse.data.data);
                 setColors(colorResponse.data.data);
                 setFlowers(flowerResponse.data.data);
                 setWeights(weightResponse.data.data);
@@ -97,24 +108,57 @@ const EditProduct = () => {
     }, [id]);
 
     // Handle input change
+    // const handleChange = (e) => {
+    //     const { name, value } = e.target;
+    //     setFormData({
+    //         ...formData,
+    //         [name]: value,
+    //     });
+
+    //     // If categoryName changes, filter subcategories
+    //     if (name === 'categoryName') {
+    //         const filteredSubcategories = subcategories.filter(
+    //             (subcategory) => subcategory.categoryName._id === value
+    //         );
+    //         setFilteredSubcategories(filteredSubcategories);
+    //     }
+    // };
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
 
-        // If categoryName changes, filter subcategories
-        if (name === 'categoryName') {
+        // Updating form data based on the changed field
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value,
+            ...(name === "categoryName" && {
+                subcategoryName: '',
+                innersubcategoryName: ''
+            }),
+            ...(name === "subcategoryName" && {
+                innersubcategoryName: ''
+            }),
+        }));
+
+        // Filter subcategories when categoryName changes
+        if (name === "categoryName") {
             const filteredSubcategories = subcategories.filter(
                 (subcategory) => subcategory.categoryName._id === value
             );
             setFilteredSubcategories(filteredSubcategories);
         }
+
+        // Filter innersubcategories when subcategoryName changes
+        if (name === "subcategoryName") {
+            const filteredInnersubcategories = innersubcategories.filter(
+                (innersubcategory) => innersubcategory.subcategoryName._id === value
+            );
+            setFilteredInnersubcategories(filteredInnersubcategories);
+        }
     };
 
-    // State to store filtered subcategories
-    const [filteredSubcategories, setFilteredSubcategories] = useState([]);
+
+
 
     // Handle file change for images
     const handleFileChange = (e) => {
@@ -126,12 +170,23 @@ const EditProduct = () => {
 
     // Handle variant change
     const handleVariantChange = (index, e) => {
-        const { name, value } = e.target;
-        const updatedVariants = [...formData.Variant];
+        const { name, value } = e.target; // Get the field name and value
+        const updatedVariants = [...formData.Variant]; // Clone the variants array
+
+        // Update the specific field of the variant
         updatedVariants[index][name] = value;
+
+        // Automatically calculate finalPrice when price or discountPrice changes
+        if (name === 'price' || name === 'discountPrice') {
+            const price = parseFloat(updatedVariants[index].price) || 0;
+            const discount = parseFloat(updatedVariants[index].discountPrice) || 0;
+
+            updatedVariants[index].finalPrice = price - (price * (discount / 100));
+        }
+
         setFormData({
             ...formData,
-            Variant: updatedVariants,
+            Variant: updatedVariants, // Update the state
         });
     };
 
@@ -181,6 +236,7 @@ const EditProduct = () => {
         const form = new FormData();
         form.append("categoryName", formData.categoryName);
         form.append("subcategoryName", formData.subcategoryName);
+        form.append('innersubcategoryName', formData.innersubcategoryName);
         form.append("productName", formData.productName);
         form.append("productDescription", formData.productDescription);
         form.append("productSubDescription", formData.productSubDescription);
@@ -228,7 +284,7 @@ const EditProduct = () => {
 
             <div className="d-form">
                 <form className="row g-3" onSubmit={handleSubmit}>
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                         <label htmlFor="categoryName" className="form-label">Category Name<sup className="text-danger">*</sup></label>
                         <select name="categoryName" className="form-select" id="categoryName" value={formData.categoryName} onChange={handleChange}>
                             <option value="" disabled>Select Category</option>
@@ -240,7 +296,7 @@ const EditProduct = () => {
                         </select>
                     </div>
 
-                    <div className="col-md-4">
+                    <div className="col-md-3">
                         <label htmlFor="subcategoryName" className="form-label">Subcategory Name<sup className="text-danger">*</sup></label>
                         <select
                             name="subcategoryName"
@@ -248,7 +304,7 @@ const EditProduct = () => {
                             id="subcategoryName"
                             value={formData.subcategoryName}
                             onChange={handleChange}
-                            // required
+                        // required
                         >
                             <option value="" selected disabled>Select Subcategory</option>
                             {filteredSubcategories.map((item, index) => (
@@ -257,7 +313,25 @@ const EditProduct = () => {
                         </select>
                     </div>
 
-                    <div className="col-md-4">
+                    <div className="col-md-3">
+                        <label htmlFor="innersubcategoryName" className="form-label">Inner Subcategory Name<sup className='text-danger'>*</sup></label>
+                        <select
+                            name="innersubcategoryName"
+                            className="form-select"
+                            id="innersubcategoryName"
+                            value={formData.innersubcategoryName}
+                            onChange={handleChange}
+                            disabled={!formData.subcategoryName}  // Disable until subcategory is selected
+                        // required
+                        >
+                            <option value="" selected disabled>Select Inner Subcategory</option>
+                            {filteredInnersubcategories.map((item, index) => (
+                                <option key={index} value={item._id}>{item.innerSubcategoryName}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="col-md-3">
                         <label htmlFor="productName" className="form-label">Product Name<sup className="text-danger">*</sup></label>
                         <input type="text" name='productName' className="form-control" id="productName" value={formData.productName} onChange={handleChange} />
                     </div>
@@ -384,13 +458,13 @@ const EditProduct = () => {
                                         />
                                     </div>
                                     <div className="col-md-3">
-                                        <label htmlFor={`finalPrice-${index}`} className="form-label">Final Price<sup className="text-danger">*</sup></label>
+                                        <label htmlFor={`finalPrice-${index}`} className="form-label">Final Price<sup className='text-danger'>*</sup></label>
                                         <input
                                             type="number"
                                             name="finalPrice"
                                             className="form-control"
                                             value={variant.finalPrice}
-                                            onChange={(e) => handleVariantChange(index, e)}
+                                            readOnly // Make the field read-only
                                         />
                                     </div>
                                     <div className="col-md-3">

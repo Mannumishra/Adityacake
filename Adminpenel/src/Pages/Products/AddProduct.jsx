@@ -75,42 +75,79 @@ const AddProduct = () => {
     }, []);
 
 
+    // const handleChange = (e) => {
+    //     const { name, value } = e.target;
+    //     setFormData({
+    //         ...formData,
+    //         [name]: value,
+    //     });
+
+    //     // If categoryName changes, filter subcategories
+    //     if (name === 'categoryName') {
+    //         const filteredSubcategories = subcategories.filter(
+    //             (subcategory) => subcategory.categoryName._id === value
+    //         );
+    //         setFilteredSubcategories(filteredSubcategories);
+    //         setFormData({
+    //             ...formData,
+    //             subcategoryName: '', // Reset subcategory when category changes
+    //             innersubcategoryName: '', // Reset inner subcategory when category changes
+    //         });
+    //     }
+
+    //     // If subcategoryName changes, filter innersubcategories
+    //     if (name === 'subcategoryName') {
+    //         const filteredInnersubcategories = innersubcategories.filter(
+    //             (innersubcategory) => innersubcategory.subcategoryName === value
+    //         );
+    //         setFilteredInnersubcategories(filteredInnersubcategories);
+    //         setFormData({
+    //             ...formData,
+    //             innersubcategoryName: '', // Reset inner subcategory when subcategory changes
+    //         });
+    //     }
+    // };
+
+
+
+    // Handle file change for images
+
+
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
 
-        // If categoryName changes, filter subcategories
-        if (name === 'categoryName') {
+        // Updating form data based on the changed field
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value,
+            ...(name === "categoryName" && {
+                subcategoryName: '',
+                innersubcategoryName: ''
+            }),
+            ...(name === "subcategoryName" && {
+                innersubcategoryName: ''
+            }),
+        }));
+
+        // Filter subcategories when categoryName changes
+        if (name === "categoryName") {
             const filteredSubcategories = subcategories.filter(
                 (subcategory) => subcategory.categoryName._id === value
             );
             setFilteredSubcategories(filteredSubcategories);
-            setFormData({
-                ...formData,
-                subcategoryName: '', // Reset subcategory when category changes
-                innersubcategoryName: '', // Reset inner subcategory when category changes
-            });
         }
 
-        // If subcategoryName changes, filter innersubcategories
-        if (name === 'subcategoryName') {
+        // Filter innersubcategories when subcategoryName changes
+        if (name === "subcategoryName") {
             const filteredInnersubcategories = innersubcategories.filter(
-                (innersubcategory) => innersubcategory.subcategoryName === value
+                (innersubcategory) => innersubcategory.subcategoryName._id === value
             );
             setFilteredInnersubcategories(filteredInnersubcategories);
-            setFormData({
-                ...formData,
-                innersubcategoryName: '', // Reset inner subcategory when subcategory changes
-            });
         }
     };
 
 
 
-    // Handle file change for images
     const handleFileChange = (e) => {
         setFormData({
             ...formData,
@@ -121,7 +158,18 @@ const AddProduct = () => {
     const handleVariantChange = (index, e) => {
         const { name, value } = e.target; // Get the field name and value
         const updatedVariants = [...formData.Variant]; // Clone the variants array
-        updatedVariants[index][name] = value; // Update the specific field of the variant
+
+        // Update the specific field of the variant
+        updatedVariants[index][name] = value;
+
+        // Automatically calculate finalPrice when price or discountPrice changes
+        if (name === 'price' || name === 'discountPrice') {
+            const price = parseFloat(updatedVariants[index].price) || 0;
+            const discount = parseFloat(updatedVariants[index].discountPrice) || 0;
+
+            updatedVariants[index].finalPrice = price - (price * (discount / 100));
+        }
+
         setFormData({
             ...formData,
             Variant: updatedVariants, // Update the state
@@ -403,8 +451,7 @@ const AddProduct = () => {
                                             name="finalPrice"
                                             className="form-control"
                                             value={variant.finalPrice}
-                                            onChange={(e) => handleVariantChange(index, e)}
-                                            required
+                                            readOnly // Make the field read-only
                                         />
                                     </div>
                                     <div className="col-md-3">
