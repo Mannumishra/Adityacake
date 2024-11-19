@@ -44,6 +44,9 @@ import EditProduct from '../../Pages/Products/EditProduct '
 import AllInnerSubCategory from '../../Pages/InnerSubCategory/AllInnerSubCategory'
 import AddInnerSubCategory from '../../Pages/InnerSubCategory/AddInnerSubCategory'
 import EditInnerSubCategory from '../../Pages/InnerSubCategory/EditInnerSubCategory'
+import AllProductTag from '../../Pages/ProductTag/AllProductTag'
+import AddProductTag from '../../Pages/ProductTag/AddProductTag'
+import EditProductTag from '../../Pages/ProductTag/EditProductTag'
 
 const Home = () => {
   return (
@@ -126,6 +129,11 @@ const Home = () => {
           <Route path={"/all-inner-subcategory"} element={<AllInnerSubCategory />} />
           <Route path={"/add-innersubcategory"} element={<AddInnerSubCategory />} />
           <Route path={"/edit-innersubcategory/:id"} element={<EditInnerSubCategory />} />
+
+
+          <Route path={"/all-product-tag"} element={<AllProductTag />} />
+          <Route path={"/add-product-tag"} element={<AddProductTag />} />
+          <Route path={"/edit-product-tag/:id"} element={<EditProductTag />} />
 
           {/* all-shop */}
 

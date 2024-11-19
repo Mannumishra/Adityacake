@@ -12,6 +12,7 @@ const TagRouter = require("./Router/tagRoutes")
 const CategoryTitelRouter = require("./Router/categoryTitelRoutes")
 const ProductRouter = require("./Router/productRoutes")
 const InnerSubcategoryRouter = require("./Router/InnerSubcategoryRouter")
+const ProductTagRouter = require("./Router/ProductTagRouter")
 
 const app = express()
 
@@ -35,6 +36,7 @@ app.use("/api", TagRouter)
 app.use("/api", CategoryTitelRouter)
 app.use("/api", ProductRouter)
 app.use("/api", InnerSubcategoryRouter)
+app.use("/api", ProductTagRouter)
 
 app.listen(8000, () => {
     console.log("Server Start")
