@@ -1,7 +1,6 @@
 const RefrenceCompany = require("../Model/RefrenceCompanyModel");
 
 
-// Create a new reference company
 const createRefCompany = async (req, res) => {
     try {
         const { refCompanyName } = req.body;
@@ -9,6 +8,17 @@ const createRefCompany = async (req, res) => {
         // Validate input
         if (!refCompanyName) {
             return res.status(400).json({ message: "Reference company name is required" });
+        }
+
+        // Check if the reference company with the same name already exists (case-insensitive)
+        const existingRefCompany = await RefrenceCompany.findOne({
+            refCompanyName: { $regex: `^${refCompanyName.trim()}$`, $options: 'i' }
+        });
+
+        if (existingRefCompany) {
+            return res.status(400).json({
+                message: "Reference company with this name already exists"
+            });
         }
 
         const newRefCompany = new RefrenceCompany({ refCompanyName });
@@ -22,6 +32,7 @@ const createRefCompany = async (req, res) => {
         res.status(500).json({ message: "Error creating reference company", error: error.message });
     }
 };
+
 
 // Get all reference companies
 const getAllRefCompanies = async (req, res) => {
@@ -66,6 +77,18 @@ const updateRefCompany = async (req, res) => {
             return res.status(400).json({ message: "Reference company name is required" });
         }
 
+        // Check if the new company name already exists (case-insensitive)
+        const existingRefCompany = await RefrenceCompany.findOne({
+            refCompanyName: { $regex: `^${refCompanyName.trim()}$`, $options: 'i' },
+            _id: { $ne: id } // Exclude the current company being updated
+        });
+
+        if (existingRefCompany) {
+            return res.status(400).json({
+                message: "Reference company with this name already exists"
+            });
+        }
+
         const updatedRefCompany = await RefrenceCompany.findByIdAndUpdate(
             id,
             { refCompanyName },
@@ -84,6 +107,7 @@ const updateRefCompany = async (req, res) => {
         res.status(500).json({ message: "Error updating reference company", error: error.message });
     }
 };
+
 
 // Delete a reference company by ID
 const deleteRefCompany = async (req, res) => {

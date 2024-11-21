@@ -10,6 +10,17 @@ exports.createTag = async (req, res) => {
     }
 
     try {
+        // Check if a tag with the same name already exists (case-insensitive)
+        const existingTag = await Tag.findOne({
+            tagName: { $regex: `^${tagName.trim()}$`, $options: 'i' } // Case-insensitive check
+        });
+
+        if (existingTag) {
+            return res.status(400).json({
+                message: 'Tag with this name already exists'
+            });
+        }
+
         const newTag = new Tag({
             tagName,
             tagColor
@@ -21,6 +32,7 @@ exports.createTag = async (req, res) => {
         res.status(500).json({ message: 'Error creating tag', error: error.message });
     }
 };
+
 
 // Get all tags
 exports.getAllTags = async (req, res) => {
@@ -49,7 +61,6 @@ exports.getSingleTag = async (req, res) => {
     }
 };
 
-// Update a tag by its ID
 exports.updateTag = async (req, res) => {
     const { id } = req.params;
     const { tagName, tagColor } = req.body;
@@ -59,6 +70,19 @@ exports.updateTag = async (req, res) => {
     }
 
     try {
+        // Check if a tag with the same name already exists (excluding the tag being updated)
+        const existingTag = await Tag.findOne({
+            tagName: { $regex: `^${tagName.trim()}$`, $options: 'i' },
+            _id: { $ne: id }  // Exclude the current tag being updated
+        });
+
+        if (existingTag) {
+            return res.status(400).json({
+                message: 'Tag with this name already exists'
+            });
+        }
+
+        // Proceed with the update if the tag name is unique
         const updatedTag = await Tag.findByIdAndUpdate(id, { tagName, tagColor }, { new: true });
 
         if (!updatedTag) {
@@ -70,6 +94,7 @@ exports.updateTag = async (req, res) => {
         res.status(500).json({ message: 'Error updating tag', error: error.message });
     }
 };
+
 
 // Delete a tag by its ID
 exports.deleteTag = async (req, res) => {

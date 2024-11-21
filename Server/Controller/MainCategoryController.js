@@ -14,7 +14,6 @@ const deleteImageFile = (relativeFilePath) => {
     });
 };
 
-// Create Main Category
 const createMainCategory = async (req, res) => {
     try {
         const { mainCategoryName, mainCategoryStatus } = req.body;
@@ -25,8 +24,20 @@ const createMainCategory = async (req, res) => {
             return res.status(400).json({ message: "Main category name and image are required." });
         }
 
+        // Convert input name to lowercase for consistent comparison
+        const normalizedCategoryName = mainCategoryName.toLowerCase();
+
+        // Check if the category name already exists
+        const existingCategory = await MainCategory.findOne({
+            mainCategoryName: { $regex: `^${normalizedCategoryName}$`, $options: "i" },
+        });
+        if (existingCategory) {
+            if (mainCategoryImage) deleteImageFile(mainCategoryImage);
+            return res.status(400).json({ message: "Main category name already exists." });
+        }
+
         const newCategory = new MainCategory({
-            mainCategoryName,
+            mainCategoryName: normalizedCategoryName, // Store the normalized name
             mainCategoryImage,
             mainCategoryStatus: mainCategoryStatus || "False",
         });
@@ -40,16 +51,35 @@ const createMainCategory = async (req, res) => {
     }
 };
 
+
 const updateMainCategory = async (req, res) => {
     try {
         const { id } = req.params;
         const { mainCategoryName, mainCategoryStatus } = req.body;
         const mainCategoryImage = req.file ? req.file.path : null;
 
+        // Find the category to update
         const category = await MainCategory.findById(id);
         if (!category) {
             if (mainCategoryImage) deleteImageFile(mainCategoryImage);
             return res.status(404).json({ message: "Main Category not found" });
+        }
+
+        // Check if the new name already exists (case-insensitive and excludes the current category)
+        if (mainCategoryName) {
+            const normalizedCategoryName = mainCategoryName.toLowerCase();
+            const existingCategory = await MainCategory.findOne({
+                mainCategoryName: { $regex: `^${normalizedCategoryName}$`, $options: "i" },
+                _id: { $ne: id }, // Exclude the current category
+            });
+
+            if (existingCategory) {
+                if (mainCategoryImage) deleteImageFile(mainCategoryImage);
+                return res.status(400).json({ message: "Main category name already exists." });
+            }
+
+            // Update the name with the normalized version
+            category.mainCategoryName = normalizedCategoryName;
         }
 
         // Delete old image if a new one is uploaded
@@ -57,7 +87,6 @@ const updateMainCategory = async (req, res) => {
             deleteImageFile(category.mainCategoryImage);
         }
 
-        category.mainCategoryName = mainCategoryName || category.mainCategoryName;
         category.mainCategoryImage = mainCategoryImage || category.mainCategoryImage;
         category.mainCategoryStatus = mainCategoryStatus || category.mainCategoryStatus;
 
@@ -69,6 +98,7 @@ const updateMainCategory = async (req, res) => {
         res.status(500).json({ message: "Error updating main category", error: error.message });
     }
 };
+
 
 
 // Delete Main Category

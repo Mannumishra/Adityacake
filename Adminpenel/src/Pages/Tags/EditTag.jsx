@@ -41,7 +41,7 @@ const EditTag = () => {
             toast.success('Tag updated successfully!');
             navigate('/all-tags');  // Redirect to All Tags page after success
         } catch (error) {
-            toast.error('Error updating the tag!');
+            toast.error(error.response.data.message);
         } finally {
             setBtnLoading(false);
         }

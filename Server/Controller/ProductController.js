@@ -15,10 +15,9 @@ const deleteImageFile = (relativeFilePath) => {
     });
 };
 
-// Create Product
 const createProduct = async (req, res) => {
-    console.log(req.body)
-    const { categoryName, subcategoryName, productName, productSubDescription, productDescription, productTag, refrenceCompany, Variant ,refrenceCompanyUrl,innersubcategoryName} = req.body;
+    console.log(req.body);
+    const { categoryName, subcategoryName, productName, productSubDescription, productDescription, productTag, refrenceCompany, Variant, refrenceCompanyUrl, innersubcategoryName } = req.body;
     const errorMessage = [];
 
     // Validation for required fields
@@ -38,12 +37,38 @@ const createProduct = async (req, res) => {
         }
         return res.status(400).json({ errors: errorMessage });
     }
+
+    // Check if product name already exists
+    const existingProduct = await Product.findOne({
+        productName: { $regex: `^${productName.trim()}$`, $options: 'i' } // Case-insensitive check
+    });
+
+    if (existingProduct) {
+        if (req.files) {
+            req.files.forEach((file) => deleteImageFile(file.path)); // Cleanup uploaded files if product name is not unique
+        }
+        return res.status(400).json({ message: 'Product with this name already exists' });
+    }
+
+    // If no images are uploaded
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({
             success: false,
             message: "Product Images are required"
         });
     }
+
+    // Generate a unique SKU code for the product
+    const generateSKU = async () => {
+        // Find the last product created and get its SKU
+        const lastProduct = await Product.findOne().sort({ createdAt: -1 }).select('sku');
+        if (lastProduct) {
+            const lastSku = lastProduct.sku; // Get the last SKU
+            const lastSkuNumber = parseInt(lastSku.split('SKU')[1]); // Extract the number part of the SKU
+            return `SKU${(lastSkuNumber + 1).toString().padStart(3, '0')}`; // Increment and pad with leading zeros
+        }
+        return 'SKU001'; // Default SKU if no products exist
+    };
 
     // Proceed with creating the product
     const productData = {
@@ -58,6 +83,7 @@ const createProduct = async (req, res) => {
         refrenceCompanyUrl,
         Variant: JSON.parse(Variant), // Assuming it's a stringified JSON
         productImage: req.files.map(file => file.path), // Save paths to the uploaded images
+        sku: await generateSKU(), // Generate unique SKU
     };
 
     try {
@@ -69,6 +95,8 @@ const createProduct = async (req, res) => {
     }
 };
 
+
+
 // Read Products
 const getProducts = async (req, res) => {
     try {
@@ -77,6 +105,7 @@ const getProducts = async (req, res) => {
             .populate('subcategoryName')
             .populate('productTag')
             .populate('refrenceCompany')
+            .populate('innersubcategoryName')
             .populate({
                 path: 'Variant.color',
                 model: 'Color',
@@ -101,7 +130,7 @@ const getProducts = async (req, res) => {
 const getProduct = async (req, res) => {
     const { id } = req.params;
     try {
-        const product = await Product.findById(id).populate('categoryName subcategoryName productTag refrenceCompany');
+        const product = await Product.findById(id).populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany');
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
@@ -114,7 +143,8 @@ const getProduct = async (req, res) => {
 // Update Product
 const updateProduct = async (req, res) => {
     const { id } = req.params;
-    console.log(req.body)
+    console.log(req.body);
+
     // Collect updated data from the request body
     const updatedData = {
         categoryName: req.body.categoryName,
@@ -124,8 +154,8 @@ const updateProduct = async (req, res) => {
         productDescription: req.body.productDescription,
         productTag: req.body.productTag,
         refrenceCompany: req.body.refrenceCompany,
-        refrenceCompanyUrl:req.body.refrenceCompanyUrl,
-        innersubcategoryName:req.body.innersubcategoryName,
+        refrenceCompanyUrl: req.body.refrenceCompanyUrl,
+        innersubcategoryName: req.body.innersubcategoryName,
         Variant: JSON.parse(req.body.Variant), // Assuming it's a stringified JSON
     };
 
@@ -141,10 +171,22 @@ const updateProduct = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
+        // Check if the product name is unique (to avoid updating to an existing product name)
+        if (req.body.productName && req.body.productName !== product.productName) {
+            const existingProduct = await Product.findOne({
+                productName: { $regex: `^${req.body.productName.trim()}$`, $options: 'i' }, // Case-insensitive check
+            });
+
+            if (existingProduct) {
+                // If a product with the same name exists, return an error
+                return res.status(400).json({ message: 'Product with this name already exists' });
+            }
+        }
+
         // If new images are provided, delete the old ones
         if (req.files && req.files.length > 0) {
             product.productImage.forEach((imagePath) => {
-                deleteImageFile(imagePath); // Delete old images
+                deleteImageFile(imagePath); // Delete old images from file storage
             });
         }
 
@@ -154,10 +196,11 @@ const updateProduct = async (req, res) => {
         // Return the updated product data in the response
         res.status(200).json({ message: 'Product updated successfully', updatedProduct });
     } catch (err) {
-        console.log(error)
+        console.error(err);
         res.status(500).json({ error: err.message });
     }
 };
+
 
 // Delete Product
 const deleteProduct = async (req, res) => {

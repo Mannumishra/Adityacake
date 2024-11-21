@@ -12,8 +12,20 @@ const createColor = async (req, res) => {
             });
         }
 
+        // Check if a color with the same name already exists
+        const existingColor = await Color.findOne({ 
+            colorName: { $regex: `^${colorName.trim()}$`, $options: "i" } 
+        });
+
+        if (existingColor) {
+            return res.status(400).json({
+                success: false,
+                message: "Color Name already exists"
+            });
+        }
+
         const newColor = new Color({
-            colorName,
+            colorName: colorName.trim(), // Trim whitespace from name
             color,
             colorStatus: colorStatus || "False" // Default to "False" if not provided
         });
@@ -24,12 +36,14 @@ const createColor = async (req, res) => {
             data: savedColor
         });
     } catch (error) {
+        console.error("Error creating color:", error);
         res.status(500).json({
             message: 'Error creating color',
             error: error.message
         });
     }
 };
+
 
 // Get all colors
 const getAllColors = async (req, res) => {
@@ -77,6 +91,20 @@ const updateColor = async (req, res) => {
         const { id } = req.params; // Get the color ID from the request parameters
         const { colorName, color, colorStatus } = req.body; // Extract data from the request body
 
+        // Check if a color with the same name (ignoring case) already exists, excluding the current color
+        const existingColor = await Color.findOne({
+            colorName: { $regex: `^${colorName.trim()}$`, $options: "i" },
+            _id: { $ne: id } // Exclude the current color being updated
+        });
+
+        if (existingColor) {
+            return res.status(400).json({
+                success: false,
+                message: "Color Name already exists"
+            });
+        }
+
+        // Update the color
         const updatedColor = await Color.findByIdAndUpdate(
             id,
             { colorName, color, colorStatus },
@@ -100,6 +128,7 @@ const updateColor = async (req, res) => {
         });
     }
 };
+
 
 // Delete a color by ID
 const deleteColor = async (req, res) => {

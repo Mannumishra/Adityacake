@@ -262,7 +262,7 @@ const EditProduct = () => {
             navigate("/all-products")
         } catch (err) {
             console.log(err)
-            toast.error("Error updating product!");
+            toast.error(err.response.data.message);
         } finally {
             setIsLoading(false);
         }

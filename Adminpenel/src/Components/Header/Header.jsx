@@ -38,7 +38,7 @@ const Header = () => {
             <li><Link to="/all-category" onClick={handletoggleBtn}> <i class="fa-solid fa-tags"></i> Manage Category</Link></li>
             <li><Link to="/all-subcategory" onClick={handletoggleBtn}> <i class="fa-solid fa-tag"></i> Manage Sub Category</Link></li>
             <li><Link to="/all-inner-subcategory" onClick={handletoggleBtn}> <i class="fa-regular fa-images"></i> Manage Inner Subcategory</Link></li>
-            <li><Link to="/all-category-titel" onClick={handletoggleBtn}> <i class="fa-regular fa-images"></i> Manage Category Titel</Link></li>
+            {/* <li><Link to="/all-category-titel" onClick={handletoggleBtn}> <i class="fa-regular fa-images"></i> Manage Category Titel</Link></li> */}
             <li><Link to="/all-color" onClick={handletoggleBtn}> <i class="fa-solid fa-palette"></i> Manage Color</Link></li>
             <li><Link to="/all-size" onClick={handletoggleBtn}> <i class="fa-solid fa-ruler-combined"></i> Manage Size</Link></li>
             <li><Link to="/all-flower" onClick={handletoggleBtn}> <i class="fa-solid fa-seedling"></i> Manage Flower</Link></li>

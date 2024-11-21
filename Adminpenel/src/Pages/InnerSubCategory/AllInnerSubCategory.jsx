@@ -82,21 +82,21 @@ const AllInnerSubCategory = () => {
                         {innerSubcategories.map((subcategory, index) =>
                             <tr key={subcategory._id}>
                                 <td>{index + 1}</td>
-                                <td>{subcategory.categoryName.mainCategoryName}</td>
-                                <td>{subcategory.subcategoryName.subcategoryName}</td>
+                                <td>{subcategory?.categoryName?.mainCategoryName}</td>
+                                <td>{subcategory?.subcategoryName?.subcategoryName}</td>
                                 <td>{subcategory.innerSubcategoryName}</td>
                                 <td>
                                     <img src={`http://localhost:8000/${subcategory.Image}`} alt={subcategory.innerSubcategoryName} style={{ width: '50px', height: '50px' }} />
                                 </td>
                                 <td>{subcategory.Status}</td>
                                 <td>
-                                    <Link to={`/edit-innersubcategory/${subcategory._id}`} className="btn btn-primary">
-                                        Edit
+                                    <Link to={`/edit-innersubcategory/${subcategory._id}`} className="bt edit">
+                                        Edit <i className="fa-solid fa-pen-to-square"></i>
                                     </Link>
                                 </td>
                                 <td>
-                                    <button onClick={() => handleDelete(subcategory._id)} className="btn btn-danger">
-                                        Delete
+                                    <button onClick={() => handleDelete(subcategory._id)} className="bt delete">
+                                        Delete <i className="fa-solid fa-trash"></i>
                                     </button>
                                 </td>
                             </tr>

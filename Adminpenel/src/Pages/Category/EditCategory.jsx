@@ -61,7 +61,7 @@ const EditCategory = () => {
             toast.success(response.data.message);
             navigate("/all-category");
         } catch (error) {
-            toast.error('Error updating category');
+            toast.error(error.response.data.message);
             console.error('Error updating category:', error);
         } finally {
             setBtnLoading(false);

@@ -248,7 +248,7 @@ const AddProduct = () => {
             toast.success('Product added successfully!');
             navigate("/all-products")
         } catch (err) {
-            toast.error('Error adding product!');
+            toast.error(err.response.data.message);
         } finally {
             setIsLoading(false);
         }

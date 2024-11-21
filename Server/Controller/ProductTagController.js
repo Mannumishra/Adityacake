@@ -19,8 +19,9 @@ const deleteImageFile = (relativeFilePath) => {
 // Create a new Product Tag
 exports.createProductTag = async (req, res) => {
     try {
-        console.log(req.files)
-        console.log(req.body)
+        console.log(req.files);
+        console.log(req.body);
+
         const { tagHeading, sortDescription, multipulProduct, priceRange } = req.body;
         const image = req.files ? req.files.image[0].path : null;
 
@@ -35,6 +36,31 @@ exports.createProductTag = async (req, res) => {
             });
         }
 
+        // Check if a product tag with the same tagHeading already exists (case-insensitive)
+        const existingTagHeading = await ProductTag.findOne({
+            tagHeading: { $regex: `^${tagHeading.trim()}$`, $options: 'i' } // Case-insensitive check
+        });
+
+        if (existingTagHeading) {
+            return res.status(400).json({
+                success: false,
+                message: 'Product tag with this tagHeading already exists'
+            });
+        }
+
+        // Check if a product tag with the same sortDescription already exists (case-insensitive)
+        const existingSortDescription = await ProductTag.findOne({
+            sortDescription: { $regex: `^${sortDescription.trim()}$`, $options: 'i' } // Case-insensitive check
+        });
+
+        if (existingSortDescription) {
+            return res.status(400).json({
+                success: false,
+                message: 'Product tag with this sortDescription already exists'
+            });
+        }
+
+        // Create new product tag if both tagHeading and sortDescription are unique
         const newProductTag = new ProductTag({
             tagHeading,
             sortDescription,
@@ -51,7 +77,7 @@ exports.createProductTag = async (req, res) => {
             data: savedProductTag,
         });
     } catch (error) {
-        console.log(error)
+        console.log(error);
         res.status(500).json({
             success: false,
             message: "Failed to create product tag",
@@ -59,6 +85,7 @@ exports.createProductTag = async (req, res) => {
         });
     }
 };
+
 
 exports.updateProductTag = async (req, res) => {
     try {
@@ -69,6 +96,7 @@ exports.updateProductTag = async (req, res) => {
         const updates = req.body;
         const newImage = req.file ? req.file.filename : null;
 
+        // Fetch the existing product tag by ID
         const productTag = await ProductTag.findById(id);
         if (!productTag) {
             if (newImage) deleteImageFile(newImage);
@@ -76,6 +104,34 @@ exports.updateProductTag = async (req, res) => {
                 success: false,
                 message: "Product tag not found",
             });
+        }
+
+        // Check if the tagHeading already exists (excluding the current product tag)
+        if (updates.tagHeading) {
+            const existingTagHeading = await ProductTag.findOne({
+                tagHeading: { $regex: `^${updates.tagHeading.trim()}$`, $options: 'i' },
+                _id: { $ne: id } // Exclude the current tag being updated
+            });
+            if (existingTagHeading) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Product tag with this tagHeading already exists'
+                });
+            }
+        }
+
+        // Check if the sortDescription already exists (excluding the current product tag)
+        if (updates.sortDescription) {
+            const existingSortDescription = await ProductTag.findOne({
+                sortDescription: { $regex: `^${updates.sortDescription.trim()}$`, $options: 'i' },
+                _id: { $ne: id } // Exclude the current tag being updated
+            });
+            if (existingSortDescription) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Product tag with this sortDescription already exists'
+                });
+            }
         }
 
         // Delete the old tag image if a new one is uploaded
@@ -108,6 +164,7 @@ exports.updateProductTag = async (req, res) => {
             });
         }
 
+        // Perform the update with the new data
         const updatedProductTag = await ProductTag.findByIdAndUpdate(
             id,
             {

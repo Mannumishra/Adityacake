@@ -15,7 +15,6 @@ const deleteImageFile = (relativeFilePath) => {
 };
 
 exports.createInnerSubcategory = async (req, res) => {
-    console.log(req.body)
     try {
         const { categoryName, subcategoryName, innerSubcategoryName, Status } = req.body;
 
@@ -27,10 +26,27 @@ exports.createInnerSubcategory = async (req, res) => {
         }
 
         const Image = req.file ? req.file.path : null;
+
+        // Normalize the inner subcategory name for consistent comparison
+        const normalizedInnerSubcategoryName = innerSubcategoryName.trim().toLowerCase();
+
+        // Check for existing inner subcategory with the same name under the same category and subcategory
+        const existingInnerSubcategory = await InnerSubcategory.findOne({
+            categoryName,
+            subcategoryName,
+            innerSubcategoryName: { $regex: `^${normalizedInnerSubcategoryName}$`, $options: "i" }, // Case-insensitive search
+        });
+
+        if (existingInnerSubcategory) {
+            if (Image) deleteImageFile(Image);
+            return res.status(400).json({ message: "Inner Subcategory name already exists." });
+        }
+
+        // Create a new inner subcategory
         const newInnerSubcategory = new InnerSubcategory({
             categoryName,
             subcategoryName,
-            innerSubcategoryName,
+            innerSubcategoryName: normalizedInnerSubcategoryName, // Store the normalized name
             Image,
             Status,
         });
@@ -41,10 +57,12 @@ exports.createInnerSubcategory = async (req, res) => {
             data: savedInnerSubcategory,
         });
     } catch (error) {
+        if (req.file) deleteImageFile(req.file.path);
         console.error("Error creating inner subcategory:", error);
         res.status(500).json({ message: "Server error. Please try again later." });
     }
 };
+
 // Get all Inner Subcategories
 exports.getAllInnerSubcategories = async (req, res) => {
     try {
@@ -91,29 +109,46 @@ exports.updateInnerSubcategory = async (req, res) => {
     try {
         const { id } = req.params;
         const { categoryName, subcategoryName, innerSubcategoryName, Status } = req.body;
-        let Image = req.file ? req.file.path : null;  // Get new image path if updated
+        let Image = req.file ? req.file.path : null; // Get new image path if updated
 
         // Fetch the existing inner subcategory to check for the old image
         const innerSubcategory = await InnerSubcategory.findById(id);
 
         if (!innerSubcategory) {
+            if (Image) deleteImageFile(Image);
             return res.status(404).json({ message: "Inner Subcategory not found." });
+        }
+
+        // Normalize the inner subcategory name for consistent comparison
+        const normalizedInnerSubcategoryName = innerSubcategoryName.trim().toLowerCase();
+
+        // Check for duplicate name under the same category and subcategory, excluding the current record
+        const existingInnerSubcategory = await InnerSubcategory.findOne({
+            categoryName,
+            subcategoryName,
+            innerSubcategoryName: { $regex: `^${normalizedInnerSubcategoryName}$`, $options: "i" },
+            _id: { $ne: id }, // Exclude the current record
+        });
+
+        if (existingInnerSubcategory) {
+            if (Image) deleteImageFile(Image); // Delete the new uploaded image if duplicate found
+            return res.status(400).json({ message: "Inner Subcategory name already exists." });
         }
 
         // Prepare the updated data object
         const updatedData = {
             categoryName,
             subcategoryName,
-            innerSubcategoryName,
+            innerSubcategoryName: normalizedInnerSubcategoryName, // Save normalized name
             Status,
         };
 
         // If a new image is uploaded and it is different from the old one, delete the old image
         if (Image && innerSubcategory.Image && innerSubcategory.Image !== Image) {
             deleteImageFile(innerSubcategory.Image); // Delete the old image
-            updatedData.Image = Image;  // Set the new image path
+            updatedData.Image = Image; // Set the new image path
         } else if (Image) {
-            updatedData.Image = Image;  // Only update the image if it's new
+            updatedData.Image = Image; // Only update the image if it's new
         }
 
         // Update the inner subcategory in the database

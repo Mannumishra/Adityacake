@@ -88,12 +88,13 @@ const AllProduct = () => {
                 <table className="table table-bordered table-striped table-hover">
                     <thead>
                         <tr>
-                            <th>#</th>
+                            <th>S no</th>
+                            <th>Sku</th>
                             <th>Category</th>
                             <th>Subcategory</th>
+                            <th>Inner Subcategory</th>
                             <th>Product Name</th>
-                            <th>Description</th>
-                            <th>Variants</th>
+                            <th>Company Refrence</th>
                             <th>Images</th>
                             <th>Actions</th>
                         </tr>
@@ -115,11 +116,14 @@ const AllProduct = () => {
                             filteredProducts.map((product, index) => (
                                 <tr key={product._id}>
                                     <td>{index + 1}</td>
+                                    <td>{product.sku}</td>
                                     <td>{product.categoryName?.mainCategoryName || "N/A"}</td>
                                     <td>{product.subcategoryName?.subcategoryName || "N/A"}</td>
+                                    <td>{product.innersubcategoryName?.innerSubcategoryName || "N/A"}</td>
                                     <td>{product.productName}</td>
-                                    <td>{product.productDescription}</td>
-                                    <td>
+                                    <td>{product?.refrenceCompany?.refCompanyName}</td>
+                                    {/* <td>{product.productDescription}</td> */}
+                                    {/* <td>
                                         {product.Variant.map((variant, idx) => (
                                             <div key={idx}>
                                                 <strong>Color:</strong> {variant.color?.colorName || "N/A"},
@@ -128,7 +132,7 @@ const AllProduct = () => {
                                                 <strong> Price:</strong> ₹{variant.finalPrice}
                                             </div>
                                         ))}
-                                    </td>
+                                    </td> */}
                                     <td>
                                         {product.productImage.map((image, imgIndex) => (
                                             <img
@@ -142,16 +146,16 @@ const AllProduct = () => {
                                     <td>
                                         <Link
                                             to={`/edit-product/${product._id}`}
-                                            className="btn btn-sm btn-primary"
+                                            className="bt edit"
                                         >
-                                            Edit
+                                            Edit <i className="fa-solid fa-pen-to-square"></i>
                                         </Link>
                                         &nbsp;
                                         <button
                                             onClick={() => handleDelete(product._id)}
-                                            className="btn btn-sm btn-danger"
+                                            className="bt delete"
                                         >
-                                            Delete
+                                            Delete <i className="fa-solid fa-trash"></i>
                                         </button>
                                     </td>
                                 </tr>

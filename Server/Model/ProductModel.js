@@ -83,6 +83,10 @@ const productSchema = new mongoose.Schema({
     productImage: {
         type: [String],
         required: true
+    },
+    sku:{
+        type:String,
+        default:"SKU001"
     }
 })
 

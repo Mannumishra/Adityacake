@@ -77,8 +77,8 @@ const AllProductTag = () => {
                                         ))}
                                     </td>
                                     <td>
-                                        <Link to={`/edit-product-tag/${tag._id}`} className="btn btn-success btn-sm">Edit</Link>
-                                        <button className="btn btn-danger">
+                                        <Link to={`/edit-product-tag/${tag._id}`} className="bt edit">Edit <i className="fa-solid fa-pen-to-square"></i></Link>
+                                        <button className="bt delete">
                                             Delete <i className="fa-solid fa-trash"></i>
                                         </button>
                                     </td>

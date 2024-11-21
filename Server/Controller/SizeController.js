@@ -5,25 +5,42 @@ const Size = require("../Model/SizeModel");
 const createSize = async (req, res) => {
     try {
         const { sizeweight, sizeStatus } = req.body;
+
+        // Check if sizeweight is provided
         if (!sizeweight) {
             return res.status(400).json({
                 success: false,
                 message: "Size is must required"
-            })
+            });
         }
 
+        // Check if the sizeweight already exists (ignoring case)
+        const existingSize = await Size.findOne({
+            sizeweight: { $regex: `^${sizeweight.trim()}$`, $options: 'i' }
+        });
+
+        if (existingSize) {
+            return res.status(400).json({
+                success: false,
+                message: "Size already exists"
+            });
+        }
+
+        // Create the new size
         const newSize = new Size({
             sizeweight,
             sizeStatus: sizeStatus || "False" // Default to "False" if not provided
         });
 
-        await newSize.save();
+        await newSize.save(); // Save the size to the database
+
         res.status(201).json({ message: "Size created successfully", data: newSize });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error creating size", error: error.message });
     }
 };
+
 
 // Get all sizes
 const getAllSizes = async (req, res) => {
@@ -54,8 +71,24 @@ const getSingleSize = async (req, res) => {
 const updateSize = async (req, res) => {
     try {
         const { sizeweight, sizeStatus } = req.body;
+        const { id } = req.params;
+
+        // Check if the sizeweight already exists (excluding the current size being updated)
+        const existingSize = await Size.findOne({
+            sizeweight: { $regex: `^${sizeweight.trim()}$`, $options: 'i' },
+            _id: { $ne: id } // Exclude the current size document
+        });
+
+        if (existingSize) {
+            return res.status(400).json({
+                success: false,
+                message: "Size with this weight already exists"
+            });
+        }
+
+        // Proceed with the update
         const updatedSize = await Size.findByIdAndUpdate(
-            req.params.id,
+            id,
             { sizeweight, sizeStatus },
             { new: true, runValidators: true } // Returns the updated document
         );

@@ -36,7 +36,7 @@ const AddTag = () => {
             navigate('/all-tags');  // Redirect to the page showing all tags
         } catch (error) {
             setIsLoading(false);
-            toast.error('Error adding tag!');
+            toast.error(error.response.data.message);
         }
     };
 
