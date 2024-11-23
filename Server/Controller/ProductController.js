@@ -188,16 +188,29 @@ const getProduct = async (req, res) => {
 // Get Single Product
 const getProductByname = async (req, res) => {
     const { name } = req.params;
+
     try {
-        const product = await Product.findOne({ productName: name }).populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany');
+        const product = await Product.findOne({ productName: name })
+            .populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany')
+            .populate({
+                path: 'Variant',
+                populate: [
+                    { path: 'color' },
+                    { path: 'weight' },
+                    { path: 'flover' },
+                ],
+            });
+
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
+
         res.status(200).json({ data: product });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
+
 
 
 const updateProduct = async (req, res) => {

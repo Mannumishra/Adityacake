@@ -339,7 +339,7 @@ const EditProduct = () => {
                     <div className="col-md-4">
                         <label htmlFor="productTag" className="form-label">Product Tag<sup className="text-danger">*</sup></label>
                         <select name='productTag' className="form-select" id="productTag" value={formData.productTag} onChange={handleChange}>
-                            <option value="" selected disabled>Select Category</option>
+                            <option value="" selected>Select Category</option>
                             {
                                 tag.map((item, index) =>
                                     <option value={item._id}>{item.tagName}</option>
