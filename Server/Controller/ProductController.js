@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const Product = require('../Model/ProductModel');
-const { error } = require('console');
+const mongoose = require("mongoose")
 
 // deleteImageFile function to delete images
 const deleteImageFile = (relativeFilePath) => {
@@ -17,20 +17,28 @@ const deleteImageFile = (relativeFilePath) => {
 
 const createProduct = async (req, res) => {
     console.log(req.body);
-    const { categoryName, subcategoryName, productName, productSubDescription, productDescription, productTag, refrenceCompany, Variant, refrenceCompanyUrl, innersubcategoryName } = req.body;
-    const errorMessage = [];
 
-    // Validation for required fields
+    // Extracting fields from request body
+    const {
+        categoryName,
+        subcategoryName,
+        productName,
+        productSubDescription,
+        productDescription,
+        productTag,
+        refrenceCompany,
+        Variant,
+        refrenceCompanyUrl,
+        innersubcategoryName
+    } = req.body;
+
+    // Only validate required fields
+    const errorMessage = [];
     if (!categoryName) errorMessage.push("Category Name is required");
-    if (!subcategoryName) errorMessage.push("Subcategory Name is required");
     if (!productName) errorMessage.push("Product Name is required");
-    if (!productSubDescription) errorMessage.push("Product Sub Description is required");
-    if (!productDescription) errorMessage.push("Product Description is required");
-    if (!productTag) errorMessage.push("Product Tag is required");
-    if (!refrenceCompany) errorMessage.push("Reference Company is required");
     if (!Variant) errorMessage.push("Variant is required");
 
-    // If there are any missing fields, return an error
+    // If there are validation errors
     if (errorMessage.length > 0) {
         if (req.files) {
             req.files.forEach((file) => deleteImageFile(file.path));
@@ -58,30 +66,55 @@ const createProduct = async (req, res) => {
         });
     }
 
+    // Check and parse Variant if it's a string (JSON string)
+    let parsedVariant = [];
+    try {
+        parsedVariant = Array.isArray(Variant) ? Variant : JSON.parse(Variant); // Parse if it's a string
+    } catch (error) {
+        return res.status(400).json({ message: "Invalid Variant data" });
+    }
+
     // Generate a unique SKU code for the product
     const generateSKU = async () => {
-        // Find the last product created and get its SKU
-        const lastProduct = await Product.findOne().sort({ createdAt: -1 }).select('sku');
-        if (lastProduct) {
-            const lastSku = lastProduct.sku; // Get the last SKU
-            const lastSkuNumber = parseInt(lastSku.split('SKU')[1]); // Extract the number part of the SKU
-            return `SKU${(lastSkuNumber + 1).toString().padStart(3, '0')}`; // Increment and pad with leading zeros
+        try {
+            // Find the last product created, sorting by `createdAt` in descending order
+            const lastProduct = await Product.findOne().sort({ createdAt: -1 }).select('sku');
+
+            if (lastProduct && lastProduct.sku) {
+                // Extract the numeric part of the SKU
+                const match = lastProduct.sku.match(/\d+$/); // Match the digits at the end of the SKU
+                if (match) {
+                    const lastSkuNumber = parseInt(match[0], 10); // Convert matched digits to an integer
+                    const newSkuNumber = lastSkuNumber + 1; // Increment the SKU number
+                    return `SKU${newSkuNumber.toString().padStart(3, '0')}`; // Pad the number with leading zeros
+                }
+            }
+
+            // Default SKU if no products exist or SKU is malformed
+            return 'SKU001';
+        } catch (error) {
+            console.error('Error generating SKU:', error.message);
+            return 'SKU001'; // Return default SKU in case of error
         }
-        return 'SKU001'; // Default SKU if no products exist
     };
 
     // Proceed with creating the product
     const productData = {
         categoryName,
-        subcategoryName,
+        subcategoryName: subcategoryName ? new mongoose.Types.ObjectId(subcategoryName) : null, // Optional field
         productName,
-        productSubDescription,
-        productDescription,
-        productTag,
-        refrenceCompany,
-        innersubcategoryName,
-        refrenceCompanyUrl,
-        Variant: JSON.parse(Variant), // Assuming it's a stringified JSON
+        productSubDescription : productSubDescription || null,
+        productDescription : productDescription || null,
+        refrenceCompany: refrenceCompany ? new mongoose.Types.ObjectId(refrenceCompany) : null, // Optional field
+        innersubcategoryName: innersubcategoryName ? new mongoose.Types.ObjectId(innersubcategoryName) : null, // Optional field
+        refrenceCompanyUrl: refrenceCompanyUrl || null, // Optional field
+        productTag: productTag ? new mongoose.Types.ObjectId(productTag) : null,
+        Variant: parsedVariant.map(variant => ({
+            ...variant,
+            color: variant.color ? new mongoose.Types.ObjectId(variant.color) : null,  // Handle empty color
+            weight: variant.weight ? new mongoose.Types.ObjectId(variant.weight) : null,  // Handle empty weight
+            flover: variant.flover ? new mongoose.Types.ObjectId(variant.flover) : null   // Handle empty flover
+        })),
         productImage: req.files.map(file => file.path), // Save paths to the uploaded images
         sku: await generateSKU(), // Generate unique SKU
     };
@@ -91,10 +124,10 @@ const createProduct = async (req, res) => {
         await product.save();
         res.status(201).json({ message: 'Product created successfully', product });
     } catch (err) {
+        console.log(err);
         res.status(500).json({ error: err.message });
     }
 };
-
 
 
 // Read Products
@@ -130,10 +163,21 @@ const getProducts = async (req, res) => {
 const getProduct = async (req, res) => {
     const { id } = req.params;
     try {
-        const product = await Product.findById(id).populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany');
+        const product = await Product.findById(id)
+            .populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany')
+            .populate({
+                path: 'Variant',
+                populate: [
+                    { path: 'color' },
+                    { path: 'weight' },
+                    { path: 'flover' },
+                ],
+            });
+
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
+
         res.status(200).json({ data: product });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -145,7 +189,7 @@ const getProduct = async (req, res) => {
 const getProductByname = async (req, res) => {
     const { name } = req.params;
     try {
-        const product = await Product.findOne({productName:name}).populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany');
+        const product = await Product.findOne({ productName: name }).populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany');
         if (!product) {
             return res.status(404).json({ message: 'Product not found' });
         }
@@ -156,29 +200,40 @@ const getProductByname = async (req, res) => {
 };
 
 
-// Update Product
 const updateProduct = async (req, res) => {
     const { id } = req.params;
     console.log(req.body);
 
-    // Collect updated data from the request body
-    const updatedData = {
-        categoryName: req.body.categoryName,
-        subcategoryName: req.body.subcategoryName,
-        productName: req.body.productName,
-        productSubDescription: req.body.productSubDescription,
-        productDescription: req.body.productDescription,
-        productTag: req.body.productTag,
-        refrenceCompany: req.body.refrenceCompany,
-        refrenceCompanyUrl: req.body.refrenceCompanyUrl,
-        innersubcategoryName: req.body.innersubcategoryName,
-        Variant: JSON.parse(req.body.Variant), // Assuming it's a stringified JSON
-    };
+    const {
+        categoryName,
+        subcategoryName,
+        productName,
+        productSubDescription,
+        productDescription,
+        productTag,
+        refrenceCompany,
+        Variant,
+        refrenceCompanyUrl,
+        innersubcategoryName
+    } = req.body;
 
-    // If new images are uploaded, add them to the updated data
-    if (req.files && req.files.length > 0) {
-        updatedData.productImage = req.files.map(file => file.path);
+    // Only validate required fields
+    const errorMessage = [];
+    if (!categoryName) errorMessage.push("Category Name is required");
+    if (!productName) errorMessage.push("Product Name is required");
+    if (!Variant) errorMessage.push("Variant is required");
+
+    if (errorMessage.length > 0) {
+        if (req.files) {
+            req.files.forEach((file) => deleteImageFile(file.path));
+        }
+        return res.status(400).json({ errors: errorMessage });
     }
+
+    // Helper function to validate ObjectId fields
+    const validateObjectId = (value) => {
+        return mongoose.Types.ObjectId.isValid(value) ? new mongoose.Types.ObjectId(value) : null;
+    };
 
     try {
         // Find the product by ID
@@ -187,35 +242,63 @@ const updateProduct = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        // Check if the product name is unique (to avoid updating to an existing product name)
-        if (req.body.productName && req.body.productName !== product.productName) {
+        // Check if the product name is unique
+        if (productName && productName.trim().toLowerCase() !== product.productName.toLowerCase()) {
             const existingProduct = await Product.findOne({
-                productName: { $regex: `^${req.body.productName.trim()}$`, $options: 'i' }, // Case-insensitive check
+                productName: { $regex: `^${productName.trim()}$`, $options: 'i' },
             });
-
             if (existingProduct) {
-                // If a product with the same name exists, return an error
+                if (req.files) {
+                    req.files.forEach((file) => deleteImageFile(file.path));
+                }
                 return res.status(400).json({ message: 'Product with this name already exists' });
             }
         }
 
-        // If new images are provided, delete the old ones
-        if (req.files && req.files.length > 0) {
-            product.productImage.forEach((imagePath) => {
-                deleteImageFile(imagePath); // Delete old images from file storage
-            });
+        // Parse Variant if it's a string
+        let parsedVariant = [];
+        try {
+            parsedVariant = Array.isArray(Variant) ? Variant : JSON.parse(Variant);
+        } catch (error) {
+            return res.status(400).json({ message: "Invalid Variant data" });
         }
 
-        // Update the product in the database
-        const updatedProduct = await Product.findByIdAndUpdate(id, updatedData, { new: true });
+        // If new images are uploaded, delete old ones and update
+        if (req.files && req.files.length > 0) {
+            product.productImage.forEach((imagePath) => deleteImageFile(imagePath));
+            product.productImage = req.files.map(file => file.path);
+        }
 
-        // Return the updated product data in the response
+        // Update product fields
+        product.categoryName = validateObjectId(categoryName);
+        product.subcategoryName = validateObjectId(subcategoryName);
+        product.productName = productName;
+        product.productSubDescription = productSubDescription || null;
+        product.productDescription = productDescription || null;
+        product.refrenceCompany = validateObjectId(refrenceCompany);
+        product.refrenceCompanyUrl = refrenceCompanyUrl || null;
+        product.innersubcategoryName = validateObjectId(innersubcategoryName);
+        product.productTag = validateObjectId(productTag);
+
+        product.Variant = parsedVariant.map(variant => ({
+            ...variant,
+            color: validateObjectId(variant.color),
+            weight: validateObjectId(variant.weight),
+            flover: validateObjectId(variant.flover),
+        }));
+
+        // Save the updated product
+        const updatedProduct = await product.save();
+
+        // Respond with the updated product
         res.status(200).json({ message: 'Product updated successfully', updatedProduct });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: err.message });
     }
 };
+
+
 
 
 // Delete Product

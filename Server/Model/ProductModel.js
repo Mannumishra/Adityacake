@@ -4,17 +4,17 @@ const VariantSchema = new mongoose.Schema({
     color: {
         type: mongoose.Schema.ObjectId,
         ref: "Color",
-        required: true,
+        default: null
     },
     weight: {
         type: mongoose.Schema.ObjectId,
         ref: "Size",
-        required: true,
+        default: null
     },
     flover: {
         type: mongoose.Schema.ObjectId,
         ref: "Flover",
-        required: true,
+        default: null
     },
     price: {
         type: Number,
@@ -34,7 +34,7 @@ const VariantSchema = new mongoose.Schema({
     },
     eggLess: {
         type: String,
-        required: true
+        // required: true
     }
 });
 
@@ -47,11 +47,12 @@ const productSchema = new mongoose.Schema({
     subcategoryName: {
         type: mongoose.Schema.ObjectId,
         ref: "Subcategory",
-        required: true
+        default: null
     },
     innersubcategoryName: {
         type: mongoose.Schema.ObjectId,
         ref: "InnerSubcategory",
+        default: null
     },
     productName: {
         type: String,
@@ -59,19 +60,21 @@ const productSchema = new mongoose.Schema({
     },
     productSubDescription: {
         type: String,
-        required: true,
+        default: null
     },
     productDescription: {
         type: String,
-        required: true,
+        default: null
     },
     productTag: {
         type: mongoose.Schema.ObjectId,
-        ref: "TagModel"
+        ref: "TagModel",
+        default: null
     },
     refrenceCompany: {
         type: mongoose.Schema.ObjectId,
-        ref: "RefrenceCompany"
+        ref: "RefrenceCompany",
+        default: null
     },
     refrenceCompanyUrl: {
         type: String,
@@ -84,9 +87,9 @@ const productSchema = new mongoose.Schema({
         type: [String],
         required: true
     },
-    sku:{
-        type:String,
-        default:"SKU001"
+    sku: {
+        type: String,
+        default: "SKU001"
     }
 })
 

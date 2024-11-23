@@ -224,15 +224,6 @@ const EditProduct = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Validate that all required fields in variants are filled
-        for (const variant of formData.Variant) {
-            if (!variant.color || !variant.weight || !variant.flover) {
-                toast.error("Please fill out all fields in variants.");
-                setIsLoading(false);
-                return;
-            }
-        }
-
         const form = new FormData();
         form.append("categoryName", formData.categoryName);
         form.append("subcategoryName", formData.subcategoryName);

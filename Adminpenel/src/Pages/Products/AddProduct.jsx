@@ -75,44 +75,6 @@ const AddProduct = () => {
     }, []);
 
 
-    // const handleChange = (e) => {
-    //     const { name, value } = e.target;
-    //     setFormData({
-    //         ...formData,
-    //         [name]: value,
-    //     });
-
-    //     // If categoryName changes, filter subcategories
-    //     if (name === 'categoryName') {
-    //         const filteredSubcategories = subcategories.filter(
-    //             (subcategory) => subcategory.categoryName._id === value
-    //         );
-    //         setFilteredSubcategories(filteredSubcategories);
-    //         setFormData({
-    //             ...formData,
-    //             subcategoryName: '', // Reset subcategory when category changes
-    //             innersubcategoryName: '', // Reset inner subcategory when category changes
-    //         });
-    //     }
-
-    //     // If subcategoryName changes, filter innersubcategories
-    //     if (name === 'subcategoryName') {
-    //         const filteredInnersubcategories = innersubcategories.filter(
-    //             (innersubcategory) => innersubcategory.subcategoryName === value
-    //         );
-    //         setFilteredInnersubcategories(filteredInnersubcategories);
-    //         setFormData({
-    //             ...formData,
-    //             innersubcategoryName: '', // Reset inner subcategory when subcategory changes
-    //         });
-    //     }
-    // };
-
-
-
-    // Handle file change for images
-
-
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -211,15 +173,6 @@ const AddProduct = () => {
         e.preventDefault();
         setIsLoading(true);
 
-        // Validate that all required fields in variants are filled
-        for (const variant of formData.Variant) {
-            if (!variant.color || !variant.weight || !variant.flover) {
-                toast.error('Please fill out all fields in variants.');
-                setIsLoading(false);
-                return;
-            }
-        }
-
         const form = new FormData();
         form.append('categoryName', formData.categoryName);
         form.append('subcategoryName', formData.subcategoryName);
@@ -287,7 +240,6 @@ const AddProduct = () => {
                             value={formData.subcategoryName}
                             onChange={handleChange}
                             disabled={!formData.categoryName}  // Disable until category is selected
-                            required
                         >
                             <option value="" selected disabled>Select Subcategory</option>
                             {filteredSubcategories.map((item, index) => (
@@ -305,7 +257,6 @@ const AddProduct = () => {
                             value={formData.innersubcategoryName}
                             onChange={handleChange}
                             disabled={!formData.subcategoryName}  // Disable until subcategory is selected
-                            required
                         >
                             <option value="" selected disabled>Select Inner Subcategory</option>
                             {filteredInnersubcategories.map((item, index) => (
@@ -321,16 +272,16 @@ const AddProduct = () => {
 
                     <div className="col-md-12">
                         <label htmlFor="productDescription" className="form-label">Product Description<sup className='text-danger'>*</sup></label>
-                        <textarea name='productDescription' className="form-control" id="productDescription" value={formData.productDescription} onChange={handleChange} required />
+                        <textarea name='productDescription' className="form-control" id="productDescription" value={formData.productDescription} onChange={handleChange}  />
                     </div>
 
                     <div className="col-md-12">
                         <label htmlFor="productSubDescription" className="form-label">Product Sub Description<sup className='text-danger'>*</sup></label>
-                        <textarea name='productSubDescription' className="form-control" id="productSubDescription" value={formData.productSubDescription} onChange={handleChange} required />
+                        <textarea name='productSubDescription' className="form-control" id="productSubDescription" value={formData.productSubDescription} onChange={handleChange}  />
                     </div>
                     <div className="col-md-4">
                         <label htmlFor="productTag" className="form-label">Product Tag<sup className='text-danger'>*</sup></label>
-                        <select name='productTag' className="form-select" id="productTag" value={formData.productTag} onChange={handleChange} required>
+                        <select name='productTag' className="form-select" id="productTag" value={formData.productTag} onChange={handleChange}>
                             <option value="" selected disabled>Select Category</option>
                             {
                                 tag.map((item, index) =>
@@ -341,7 +292,7 @@ const AddProduct = () => {
                     </div>
                     <div className="col-md-4">
                         <label htmlFor="refrenceCompany" className="form-label">Refrence Company<sup className='text-danger'>*</sup></label>
-                        <select name='refrenceCompany' className="form-select" id="refrenceCompany" value={formData.refrenceCompany} onChange={handleChange} required>
+                        <select name='refrenceCompany' className="form-select" id="refrenceCompany" value={formData.refrenceCompany} onChange={handleChange}>
                             <option value="" selected disabled>Select Category</option>
                             {
                                 refCompany.map((item, index) =>
@@ -353,7 +304,7 @@ const AddProduct = () => {
 
                     <div className="col-md-4">
                         <label htmlFor="refrenceCompanyUrl" className="form-label">Company Refrence Url<sup className='text-danger'>*</sup></label>
-                        <input type="text" name="refrenceCompanyUrl" id="refrenceCompanyUrl" className='form-control' value={formData.refrenceCompanyUrl} onChange={handleChange} required />
+                        <input type="text" name="refrenceCompanyUrl" id="refrenceCompanyUrl" className='form-control' value={formData.refrenceCompanyUrl} onChange={handleChange}/>
                     </div>
 
                     {/* Variant Fields */}
@@ -370,7 +321,6 @@ const AddProduct = () => {
                                             id={`color-${index}`}
                                             value={variant.color} // Link to the specific variant's color
                                             onChange={(e) => handleVariantChange(index, e)}
-                                            required
                                         >
                                             <option value="" disabled>Select Color</option>
                                             {colors.map((item) => (
@@ -389,7 +339,6 @@ const AddProduct = () => {
                                             id={`weight-${index}`}
                                             value={variant.weight} // Link to the specific variant's weight
                                             onChange={(e) => handleVariantChange(index, e)}
-                                            required
                                         >
                                             <option value="" disabled>Select Weight</option>
                                             {weights.map((item) => (
@@ -408,7 +357,6 @@ const AddProduct = () => {
                                             id={`flover-${index}`}
                                             value={variant.flover} // Link to the specific variant's flover
                                             onChange={(e) => handleVariantChange(index, e)}
-                                            required
                                         >
                                             <option value="" disabled>Select Flover</option>
                                             {flowers.map((item) => (
@@ -441,7 +389,6 @@ const AddProduct = () => {
                                             className="form-control"
                                             value={variant.discountPrice}
                                             onChange={(e) => handleVariantChange(index, e)}
-                                            required
                                         />
                                     </div>
                                     <div className="col-md-3">
@@ -451,7 +398,6 @@ const AddProduct = () => {
                                             name="finalPrice"
                                             className="form-control"
                                             value={variant.finalPrice}
-                                            readOnly // Make the field read-only
                                         />
                                     </div>
                                     <div className="col-md-3">
@@ -462,7 +408,6 @@ const AddProduct = () => {
                                             className="form-control"
                                             value={variant.stock}
                                             onChange={(e) => handleVariantChange(index, e)}
-                                            required
                                         />
                                     </div>
                                     <div className="col-md-3">
