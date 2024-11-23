@@ -10,7 +10,7 @@ const AddInnerSubCategory = () => {
         categoryName: '',
         subcategoryName: '',
         innerSubcategoryName: '',
-        subcategoryStatus: 'False',
+        innersubcategoryStatus: 'False',
         Image: null, // Handle image as file
     });
     const [mainCategories, setMainCategories] = useState([]);
@@ -72,7 +72,7 @@ const AddInnerSubCategory = () => {
     const handleCheckboxChange = () => {
         setFormData(prevData => ({
             ...prevData,
-            subcategoryStatus: prevData.subcategoryStatus === 'True' ? 'False' : 'True'
+            innersubcategoryStatus: prevData.innersubcategoryStatus === 'True' ? 'False' : 'True'
         }));
     };
 
@@ -84,7 +84,7 @@ const AddInnerSubCategory = () => {
         data.append('categoryName', formData.categoryName);
         data.append('subcategoryName', formData.subcategoryName);
         data.append('innerSubcategoryName', formData.innerSubcategoryName);
-        data.append('subcategoryStatus', formData.subcategoryStatus);
+        data.append('innersubcategoryStatus', formData.innersubcategoryStatus);
         if (formData.Image) data.append('Image', formData.Image);  // Appending image file to FormData
 
         try {
@@ -181,12 +181,12 @@ const AddInnerSubCategory = () => {
                             <input
                                 className="form-check-input"
                                 type="checkbox"
-                                name="subcategoryStatus"
-                                id="subcategoryStatus"
-                                checked={formData.subcategoryStatus === 'True'}
+                                name="innersubcategoryStatus"
+                                id="innersubcategoryStatus"
+                                checked={formData.innersubcategoryStatus === 'True'}
                                 onChange={handleCheckboxChange}
                             />
-                            <label className="form-check-label" htmlFor="subcategoryStatus">
+                            <label className="form-check-label" htmlFor="innersubcategoryStatus">
                                 Active
                             </label>
                         </div>

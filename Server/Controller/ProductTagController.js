@@ -265,6 +265,7 @@ exports.deleteProductTag = async (req, res) => {
             message: "Product tag deleted successfully",
         });
     } catch (error) {
+        console.log(error)
         res.status(500).json({
             success: false,
             message: "Failed to delete product tag",

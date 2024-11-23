@@ -19,7 +19,7 @@ const InnerSubcategorySchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    Status: {
+    innersubcategoryStatus: {
         type: String,
         default: "False"
     }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const AllProductTag = () => {
     const [productTags, setProductTags] = useState([]);
@@ -19,6 +20,32 @@ const AllProductTag = () => {
 
         fetchProductTags();
     }, []);
+
+    const deleteProductTag = async (id) => {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await axios.delete(`http://localhost:8000/api/delete-producttag/${id}`); // Replace with your actual API endpoint
+
+                    // Remove the deleted tag from the state
+                    setProductTags(productTags.filter((tag) => tag._id !== id));
+
+                    Swal.fire('Deleted!', 'Your product tag has been deleted.', 'success');
+                } catch (error) {
+                    console.error('Error deleting product tag:', error);
+                    Swal.fire('Error!', 'Failed to delete the product tag. Please try again.', 'error');
+                }
+            }
+        });
+    };
 
     return (
         <>
@@ -78,7 +105,7 @@ const AllProductTag = () => {
                                     </td>
                                     <td>
                                         <Link to={`/edit-product-tag/${tag._id}`} className="bt edit">Edit <i className="fa-solid fa-pen-to-square"></i></Link>
-                                        <button className="bt delete">
+                                        <button className="bt delete" onClick={()=>deleteProductTag(tag._id)}>
                                             Delete <i className="fa-solid fa-trash"></i>
                                         </button>
                                     </td>

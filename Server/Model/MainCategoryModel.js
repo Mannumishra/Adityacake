@@ -12,6 +12,10 @@ const MainCategorySchema = new mongoose.Schema({
     mainCategoryStatus: {
         type: String,
         default: "False"
+    },
+    subcategoryExit: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true })
 

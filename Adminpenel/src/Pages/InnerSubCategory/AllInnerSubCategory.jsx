@@ -88,7 +88,7 @@ const AllInnerSubCategory = () => {
                                 <td>
                                     <img src={`http://localhost:8000/${subcategory.Image}`} alt={subcategory.innerSubcategoryName} style={{ width: '50px', height: '50px' }} />
                                 </td>
-                                <td>{subcategory.Status}</td>
+                                <td>{subcategory.innersubcategoryStatus}</td>
                                 <td>
                                     <Link to={`/edit-innersubcategory/${subcategory._id}`} className="bt edit">
                                         Edit <i className="fa-solid fa-pen-to-square"></i>

@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const InnerSubcategory = require("../Model/InnerSubcategoryModel");
+const Subcategory = require("../Model/SubcategoryModel");
 
 
 const deleteImageFile = (relativeFilePath) => {
@@ -16,7 +17,7 @@ const deleteImageFile = (relativeFilePath) => {
 
 exports.createInnerSubcategory = async (req, res) => {
     try {
-        const { categoryName, subcategoryName, innerSubcategoryName, Status } = req.body;
+        const { categoryName, subcategoryName, innerSubcategoryName, innersubcategoryStatus } = req.body;
 
         if (!categoryName || !subcategoryName || !innerSubcategoryName) {
             if (req.file) {
@@ -48,10 +49,18 @@ exports.createInnerSubcategory = async (req, res) => {
             subcategoryName,
             innerSubcategoryName: normalizedInnerSubcategoryName, // Store the normalized name
             Image,
-            Status,
+            innersubcategoryStatus,
         });
 
         const savedInnerSubcategory = await newInnerSubcategory.save();
+
+        // Update the Subcategory document to set innersubcategoryExit to true
+        const subcategory = await Subcategory.findById(subcategoryName);
+        if (subcategory) {
+            subcategory.innersubcategoryExit = true;
+            await subcategory.save();
+        }
+
         res.status(201).json({
             message: "Inner Subcategory created successfully.",
             data: savedInnerSubcategory,
@@ -105,10 +114,33 @@ exports.getInnerSubcategoryById = async (req, res) => {
     }
 };
 
+exports.getInnerSubcategoryByName = async (req, res) => {
+    try {
+        const { name } = req.params;
+
+        const innerSubcategory = await InnerSubcategory.findOne({innerSubcategoryName:name})
+            .populate("categoryName")
+            .populate("subcategoryName")
+            .exec();
+
+        if (!innerSubcategory) {
+            return res.status(404).json({ message: "Inner Subcategory not found." });
+        }
+
+        res.status(200).json({
+            message: "Inner Subcategory fetched successfully.",
+            data: innerSubcategory,
+        });
+    } catch (error) {
+        console.error("Error fetching inner subcategory:", error);
+        res.status(500).json({ message: "Server error. Please try again later." });
+    }
+};
+
 exports.updateInnerSubcategory = async (req, res) => {
     try {
         const { id } = req.params;
-        const { categoryName, subcategoryName, innerSubcategoryName, Status } = req.body;
+        const { categoryName, subcategoryName, innerSubcategoryName, innersubcategoryStatus } = req.body;
         let Image = req.file ? req.file.path : null; // Get new image path if updated
 
         // Fetch the existing inner subcategory to check for the old image
@@ -140,7 +172,7 @@ exports.updateInnerSubcategory = async (req, res) => {
             categoryName,
             subcategoryName,
             innerSubcategoryName: normalizedInnerSubcategoryName, // Save normalized name
-            Status,
+            innersubcategoryStatus,
         };
 
         // If a new image is uploaded and it is different from the old one, delete the old image

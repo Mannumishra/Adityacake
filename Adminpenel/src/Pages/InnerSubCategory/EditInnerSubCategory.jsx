@@ -11,7 +11,7 @@ const EditInnerSubCategory = () => {
         categoryName: '',
         subcategoryName: '',
         innerSubcategoryName: '',
-        subcategoryStatus: 'False',
+        innersubcategoryStatus: 'False',
         Image: null,
     });
     const [mainCategories, setMainCategories] = useState([]);
@@ -51,7 +51,7 @@ const EditInnerSubCategory = () => {
                     categoryName: data.categoryName._id,
                     subcategoryName: data.subcategoryName._id,
                     innerSubcategoryName: data.innerSubcategoryName,
-                    subcategoryStatus: data.Status,
+                    innersubcategoryStatus: data.innersubcategoryStatus,
                     Image: null, // You might want to keep track of the image URL here if needed
                 });
                 // Filter subcategories based on the selected category
@@ -83,7 +83,7 @@ const EditInnerSubCategory = () => {
     const handleCheckboxChange = () => {
         setFormData(prevData => ({
             ...prevData,
-            subcategoryStatus: prevData.subcategoryStatus === 'True' ? 'False' : 'True'
+            innersubcategoryStatus: prevData.innersubcategoryStatus === 'True' ? 'False' : 'True'
         }));
     };
 
@@ -101,7 +101,7 @@ const EditInnerSubCategory = () => {
         data.append('categoryName', formData.categoryName);
         data.append('subcategoryName', formData.subcategoryName);
         data.append('innerSubcategoryName', formData.innerSubcategoryName);
-        data.append('subcategoryStatus', formData.subcategoryStatus);
+        data.append('innersubcategoryStatus', formData.innersubcategoryStatus);
         if (formData.Image) data.append('Image', formData.Image);
 
         try {
@@ -198,12 +198,12 @@ const EditInnerSubCategory = () => {
                             <input
                                 className="form-check-input"
                                 type="checkbox"
-                                name="subcategoryStatus"
-                                id="subcategoryStatus"
-                                checked={formData.subcategoryStatus === 'True'}
+                                name="innersubcategoryStatus"
+                                id="innersubcategoryStatus"
+                                checked={formData.innersubcategoryStatus === 'True'}
                                 onChange={handleCheckboxChange}
                             />
-                            <label className="form-check-label" htmlFor="subcategoryStatus">
+                            <label className="form-check-label" htmlFor="innersubcategoryStatus">
                                 Active
                             </label>
                         </div>

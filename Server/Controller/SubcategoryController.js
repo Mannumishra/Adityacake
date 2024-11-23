@@ -31,8 +31,8 @@ const createSubcategory = async (req, res) => {
 
     try {
         // Check if the category ID is valid
-        const validCategoryId = await MainCategory.findById(categoryName);
-        if (!validCategoryId) {
+        const validCategory = await MainCategory.findById(categoryName);
+        if (!validCategory) {
             if (subcategoryImage) deleteImageFile(subcategoryImage);
             return res.status(404).json({ success: false, message: "Invalid Category Id" });
         }
@@ -63,6 +63,11 @@ const createSubcategory = async (req, res) => {
         });
 
         await subcategory.save();
+
+        // Update the main category's subcategoryExit field to true
+        validCategory.subcategoryExit = true;
+        await validCategory.save();
+
         res.status(201).json({
             success: true,
             message: "Subcategory created successfully",
@@ -91,10 +96,34 @@ const getAllSubcategories = async (req, res) => {
     }
 };
 
+// Get all subcategories
+const getAllSubcategoriesStatusTrue = async (req, res) => {
+    try {
+        const subcategories = await Subcategory.find({ subcategoryStatus: "True" }).populate("categoryName");
+        res.status(200).json({ data: subcategories });
+    } catch (error) {
+        console.error("Error fetching subcategories:", error);
+        res.status(500).json({ message: "Error fetching subcategories", error });
+    }
+};
+
 // Get a single subcategory by ID
 const getSubcategoryById = async (req, res) => {
     try {
         const subcategory = await Subcategory.findById(req.params.id).populate("categoryName");
+        if (!subcategory) {
+            return res.status(404).json({ message: "Subcategory not found" });
+        }
+        res.status(200).json({ data: subcategory });
+    } catch (error) {
+        console.error("Error fetching subcategory:", error);
+        res.status(500).json({ message: "Error fetching subcategory", error });
+    }
+};
+
+const getSubcategoryByName = async (req, res) => {
+    try {
+        const subcategory = await Subcategory.findOne({ subcategoryName: req.params.name }).populate("categoryName");
         if (!subcategory) {
             return res.status(404).json({ message: "Subcategory not found" });
         }
@@ -163,7 +192,7 @@ const updateSubcategory = async (req, res) => {
 const deleteSubcategory = async (req, res) => {
     try {
         const subcategory = await Subcategory.findByIdAndDelete(req.params.id);
-        
+
         if (!subcategory) {
             return res.status(404).json({ message: "Subcategory not found" });
         }
@@ -187,4 +216,5 @@ module.exports = {
     getSubcategoryById,
     updateSubcategory,
     deleteSubcategory,
+    getAllSubcategoriesStatusTrue, getSubcategoryByName
 };

@@ -134,11 +134,39 @@ const getAllMainCategories = async (req, res) => {
     }
 };
 
+// Get All Main Categories
+const getAllMainCategoriesStatusTrue = async (req, res) => {
+    try {
+        const categories = await MainCategory.find({ mainCategoryStatus: "True" });
+        res.status(200).json({ message: "Main Categories retrieved successfully", data: categories });
+    } catch (error) {
+        console.error("Error retrieving main categories:", error);
+        res.status(500).json({ message: "Error retrieving main categories", error: error.message });
+    }
+};
+
 // Get Single Main Category by ID
 const getSingleMainCategory = async (req, res) => {
     try {
         const { id } = req.params;
         const category = await MainCategory.findById(id);
+
+        if (!category) {
+            return res.status(404).json({ message: "Main Category not found" });
+        }
+
+        res.status(200).json({ message: "Main Category retrieved successfully", data: category });
+    } catch (error) {
+        console.error("Error retrieving main category:", error);
+        res.status(500).json({ message: "Error retrieving main category", error: error.message });
+    }
+};
+
+// Get Single Main Category by ID
+const getSingleMainCategoryByName = async (req, res) => {
+    try {
+        const { name } = req.params;
+        const category = await MainCategory.findOne({mainCategoryName:name});
 
         if (!category) {
             return res.status(404).json({ message: "Main Category not found" });
@@ -157,5 +185,7 @@ module.exports = {
     deleteMainCategory,
     getAllMainCategories,
     getSingleMainCategory,
+    getAllMainCategoriesStatusTrue,
+    getSingleMainCategoryByName
 };
 
