@@ -103,8 +103,8 @@ const createProduct = async (req, res) => {
         categoryName,
         subcategoryName: subcategoryName ? new mongoose.Types.ObjectId(subcategoryName) : null, // Optional field
         productName,
-        productSubDescription : productSubDescription || null,
-        productDescription : productDescription || null,
+        productSubDescription: productSubDescription || null,
+        productDescription: productDescription || null,
         refrenceCompany: refrenceCompany ? new mongoose.Types.ObjectId(refrenceCompany) : null, // Optional field
         innersubcategoryName: innersubcategoryName ? new mongoose.Types.ObjectId(innersubcategoryName) : null, // Optional field
         refrenceCompanyUrl: refrenceCompanyUrl || null, // Optional field
@@ -337,11 +337,46 @@ const deleteProduct = async (req, res) => {
     }
 };
 
+const getProductByCategoryName = async (req, res) => {
+    try {
+        const { categoryName } = req.params
+        const data = await Product.find().populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany')
+            .populate({
+                path: 'Variant',
+                populate: [
+                    { path: 'color' },
+                    { path: 'weight' },
+                    { path: 'flover' },
+                ],
+            });
+
+        const filterProduct = data.filter((x) => x.categoryName.mainCategoryName === categoryName)
+        if (filterProduct.length === 0) {
+            return res.status(404).json({
+                success: false,
+                messgae: "Product not found this category"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Product Found Successfully",
+            data: filterProduct
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
+}
+
 module.exports = {
     createProduct,
     getProducts,
     getProduct,
     updateProduct,
     deleteProduct,
-    getProductByname
+    getProductByname,
+    getProductByCategoryName
 };

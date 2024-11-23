@@ -209,6 +209,43 @@ const deleteSubcategory = async (req, res) => {
     }
 };
 
+
+const getAllSubcategoryByCategoryName = async (req, res) => {
+    try {
+        const { categoryName } = req.params;
+
+        console.log("Received categoryName:", categoryName);
+
+        // Find subcategories with populated categoryName and filter based on mainCategoryName
+        const data = await Subcategory.find().populate("categoryName")  // Populate categoryName to get main category data
+        const filerData = data.filter((x) => x.categoryName.mainCategoryName === categoryName)
+
+        // If no data is found, return a 404 error
+        if (filerData.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No subcategories found for the given category name."
+            });
+        }
+
+        console.log("Found subcategories:", filerData);
+
+        res.status(200).json({
+            success: true,
+            data: filerData
+        });
+    } catch (error) {
+        console.error("Error while fetching subcategories:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        });
+    }
+};
+
+
+
 // Export all controller functions
 module.exports = {
     createSubcategory,
@@ -216,5 +253,5 @@ module.exports = {
     getSubcategoryById,
     updateSubcategory,
     deleteSubcategory,
-    getAllSubcategoriesStatusTrue, getSubcategoryByName
+    getAllSubcategoriesStatusTrue, getSubcategoryByName, getAllSubcategoryByCategoryName
 };
