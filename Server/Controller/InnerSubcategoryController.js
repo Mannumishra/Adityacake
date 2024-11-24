@@ -229,3 +229,29 @@ exports.deleteInnerSubcategory = async (req, res) => {
         res.status(500).json({ message: "Server error. Please try again later." });
     }
 };
+
+
+exports.getInnerSubcategoryBySubcategoryName = async (req, res) => {
+    try {
+        const { subcategoryname } = req.params;
+
+        const innerSubcategory = await InnerSubcategory.find()
+            .populate("categoryName")
+            .populate("subcategoryName")
+            .exec();
+
+        const filterInnerSubcategory = innerSubcategory.filter((x)=>x?.subcategoryName?.subcategoryName===subcategoryname) 
+            
+        if (filterInnerSubcategory.length===0) {
+            return res.status(404).json({ message: "Inner Subcategory not found." });
+        }
+
+        res.status(200).json({
+            message: "Inner Subcategory fetched successfully.",
+            data: filterInnerSubcategory,
+        });
+    } catch (error) {
+        console.error("Error fetching inner subcategory:", error);
+        res.status(500).json({ message: "Server error. Please try again later." });
+    }
+};

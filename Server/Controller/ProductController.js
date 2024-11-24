@@ -371,6 +371,75 @@ const getProductByCategoryName = async (req, res) => {
     }
 }
 
+const getProductBySubCategoryName = async (req, res) => {
+    try {
+        const { subcateName } = req.params
+        console.log(subcateName)
+        const data = await Product.find().populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany')
+            .populate({
+                path: 'Variant',
+                populate: [
+                    { path: 'color' },
+                    { path: 'weight' },
+                    { path: 'flover' },
+                ],
+            });
+        console.log(data)
+        const filterProduct = data.filter((x) => x?.subcategoryName?.subcategoryName === subcateName)
+        if (filterProduct.length === 0) {
+            return res.status(404).json({
+                success: false,
+                messgae: "Product not found this category"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Product Found Successfully",
+            data: filterProduct
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
+}
+
+const getProductByInnerSubCategoryName = async (req, res) => {
+    try {
+        const { innersubcategoryName } = req.params
+        const data = await Product.find().populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany')
+            .populate({
+                path: 'Variant',
+                populate: [
+                    { path: 'color' },
+                    { path: 'weight' },
+                    { path: 'flover' },
+                ],
+            });
+
+        const filterProduct = data.filter((x) => x?.innersubcategoryName?.innerSubcategoryName === innersubcategoryName)
+        if (filterProduct.length === 0) {
+            return res.status(404).json({
+                success: false,
+                messgae: "Product not found this category"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Product Found Successfully",
+            data: filterProduct
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
+}
+
 module.exports = {
     createProduct,
     getProducts,
@@ -378,5 +447,7 @@ module.exports = {
     updateProduct,
     deleteProduct,
     getProductByname,
-    getProductByCategoryName
+    getProductByCategoryName,
+    getProductBySubCategoryName,
+    getProductByInnerSubCategoryName
 };
