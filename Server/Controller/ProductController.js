@@ -440,6 +440,40 @@ const getProductByInnerSubCategoryName = async (req, res) => {
     }
 }
 
+const getProductByAnyCategoryName = async (req, res) => {
+    try {
+        const { anycategoryName } = req.params
+        const data = await Product.find().populate('categoryName subcategoryName innersubcategoryName productTag refrenceCompany')
+            .populate({
+                path: 'Variant',
+                populate: [
+                    { path: 'color' },
+                    { path: 'weight' },
+                    { path: 'flover' },
+                ],
+            });
+
+        const filterProduct = data.filter((x) => x.categoryName.mainCategoryName === anycategoryName || x?.subcategoryName?.subcategoryName === anycategoryName || x?.innersubcategoryName?.innerSubcategoryName === anycategoryName)
+        if (filterProduct.length === 0) {
+            return res.status(404).json({
+                success: false,
+                messgae: "Product not found this category"
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Product Found Successfully",
+            data: filterProduct
+        })
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({
+            success: false,
+            message: "Internal server error"
+        })
+    }
+}
+
 module.exports = {
     createProduct,
     getProducts,
@@ -449,5 +483,6 @@ module.exports = {
     getProductByname,
     getProductByCategoryName,
     getProductBySubCategoryName,
-    getProductByInnerSubCategoryName
+    getProductByInnerSubCategoryName,
+    getProductByAnyCategoryName
 };
