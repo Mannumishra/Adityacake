@@ -47,6 +47,12 @@ import EditInnerSubCategory from '../../Pages/InnerSubCategory/EditInnerSubCateg
 import AllProductTag from '../../Pages/ProductTag/AllProductTag'
 import AddProductTag from '../../Pages/ProductTag/AddProductTag'
 import EditProductTag from '../../Pages/ProductTag/EditProductTag'
+import AllShop from '../../Pages/Shop/AllShop'
+import AddShop from '../../Pages/Shop/AddShop'
+import EditShop from '../../Pages/Shop/EditShop'
+import AllShopCategory from '../../Pages/Shopcategory/AllShopCategory'
+import AddShopCategory from '../../Pages/Shopcategory/AddShopCategory'
+import EditShopCategory from '../../Pages/Shopcategory/EditShopCategory'
 
 const Home = () => {
   return (
@@ -134,6 +140,17 @@ const Home = () => {
           <Route path={"/all-product-tag"} element={<AllProductTag />} />
           <Route path={"/add-product-tag"} element={<AddProductTag />} />
           <Route path={"/edit-product-tag/:id"} element={<EditProductTag />} />
+
+
+          <Route path={"/all-shop"} element={<AllShop />} />
+          <Route path={"/add-shop"} element={<AddShop />} />
+          <Route path={"/edit-shop/:id"} element={<EditShop />} />
+
+          
+          <Route path={"/all-shop-category"} element={<AllShopCategory />} />
+          <Route path={"/add-shop-category"} element={<AddShopCategory />} />
+          <Route path={"/edit-shop-category/:id"} element={<EditShopCategory />} />
+
 
           {/* all-shop */}
 

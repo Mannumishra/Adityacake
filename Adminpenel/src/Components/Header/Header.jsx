@@ -46,6 +46,8 @@ const Header = () => {
             <li><Link to="/all-products" onClick={handletoggleBtn}> <i class="fa-solid fa-boxes-stacked"></i> Manage Product</Link></li>
             <li><Link to="/all-product-tag" onClick={handletoggleBtn}> <i class="fa-solid fa-boxes-stacked"></i> Manage Product Tag</Link></li>
             <li><Link to="/all-tags" onClick={handletoggleBtn}> <i class="fa-solid fa-tag"></i> Manage Tags</Link></li>
+            <li><Link to="/all-shop" onClick={handletoggleBtn}> <i class="fa-solid fa-tag"></i> Manage Shop Name</Link></li>
+            <li><Link to="/all-shop-category" onClick={handletoggleBtn}> <i class="fa-solid fa-tag"></i> Manage Shop Category</Link></li>
             <li><Link to="/all-voucher" onClick={handletoggleBtn}> <i class="fa-solid fa-ticket"></i> Manage Voucher</Link></li>
             <li><Link to="/all-users" onClick={handletoggleBtn}> <i class="fa-solid fa-users"></i> All Users</Link></li>
             <li><Link to="/all-orders" onClick={handletoggleBtn}> <i class="fa-solid fa-truck"></i> Manage Orders</Link></li>
